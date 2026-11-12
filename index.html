@@ -6,6 +6,22 @@
   <title>Puti-AI 雲端成績平台</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    /* 全面提升字體大小與清晰度 */
+    html {
+      font-size: 19px; /* 基準字體放大，提升大螢幕、平板與手機端閱讀舒適度 */
+      -webkit-text-size-adjust: 100%;
+    }
+    body {
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+    /* 表格與輸入框加強 */
+    table th, table td {
+      font-size: 0.92rem !important;
+    }
+    input, select, textarea {
+      font-size: 1rem !important;
+    }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     @media print {
@@ -29,7 +45,7 @@
         <div>
           <div class="flex items-center gap-2">
             <h1 class="text-base font-bold text-slate-900 leading-tight">Puti-AI 雲端成績平台</h1>
-            <span class="bg-indigo-100 text-indigo-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Google 試算表直連版</span>
+            <span class="bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-0.5 rounded-full">Google 試算表直連版</span>
           </div>
           <p class="text-xs text-slate-500">全國教師自訂發布 × 家長極速手機查詢系統（零伺服器儲存）</p>
         </div>
@@ -40,11 +56,11 @@
         <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-medium">
           <button id="viewTeacherBtn" onclick="switchView('teacher')" class="px-3.5 py-1.5 rounded-lg bg-white text-indigo-700 shadow-sm transition font-bold flex items-center gap-1.5">
             <span>👩‍🏫 老師管理後台</span>
-            <span class="bg-indigo-100 text-indigo-700 text-[10px] px-1.5 py-0.5 rounded-full">自訂五標</span>
+            <span class="bg-indigo-100 text-indigo-700 text-xs px-1.5 py-0.5 rounded-full">自訂五標</span>
           </button>
           <button id="viewParentBtn" onclick="switchView('parent')" class="px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5">
             <span>📱 家長手機查詢端</span>
-            <span class="bg-emerald-100 text-emerald-700 text-[10px] px-1.5 py-0.5 rounded-full">免記密碼</span>
+            <span class="bg-emerald-100 text-emerald-700 text-xs px-1.5 py-0.5 rounded-full">免記密碼</span>
           </button>
         </div>
 
@@ -70,7 +86,7 @@
       <div class="bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-transparent border border-emerald-200/80 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <div class="flex items-center gap-2 mb-1.5">
-            <span class="bg-emerald-600 text-white text-[11px] font-bold px-2 py-0.5 rounded">Google 雲端直連架構</span>
+            <span class="bg-emerald-600 text-white text-xs font-bold px-2 py-0.5 rounded">Google 雲端直連架構</span>
             <span class="text-xs text-emerald-800 font-medium">資料存放在老師自己的 Google 試算表，電腦關機照樣 24h 查詢！</span>
           </div>
           <h2 class="text-lg font-bold text-slate-900">老師只要貼上自己的 Google 試算表網址，立刻建立家長查詢入口</h2>
@@ -99,7 +115,7 @@
               <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
               家長端呈現開關（自由控制）
             </h3>
-            <span id="currentPresetBadge" class="text-[11px] px-2 py-0.5 bg-amber-100 text-amber-800 font-bold rounded-full">國小鼓勵模式中</span>
+            <span id="currentPresetBadge" class="text-xs px-2 py-0.5 bg-amber-100 text-amber-800 font-bold rounded-full">國小鼓勵模式中</span>
           </div>
 
           <!-- 開關群組 -->
@@ -110,9 +126,9 @@
               <div>
                 <div class="font-bold text-slate-800 flex items-center gap-1.5">
                   <span>五標落點長條圖 (頂/前/均/後/底)</span>
-                  <span id="fiveMarksStatusTag" class="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.2 rounded font-normal">已隱藏</span>
+                  <span id="fiveMarksStatusTag" class="text-xs bg-red-100 text-red-600 px-1.5 py-0.2 rounded font-normal">已隱藏</span>
                 </div>
-                <div class="text-[11px] text-slate-500 mt-0.5">國小端避免過度競爭，通常關閉；高中會考強烈建議開啟</div>
+                <div class="text-xs text-slate-500 mt-0.5">國小端避免過度競爭，通常關閉；高中會考強烈建議開啟</div>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" id="toggleFiveMarks" onchange="onSettingChanged()" class="sr-only peer">
@@ -124,7 +140,7 @@
             <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 transition hover:border-slate-200">
               <div>
                 <div class="font-bold text-slate-800">班級/年級平均對照</div>
-                <div class="text-[11px] text-slate-500 mt-0.5">讓家長了解整體水平，但不顯示最高分與排名</div>
+                <div class="text-xs text-slate-500 mt-0.5">讓家長了解整體水平，但不顯示最高分與排名</div>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" id="toggleClassAverage" checked onchange="onSettingChanged()" class="sr-only peer">
@@ -136,7 +152,7 @@
             <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 transition hover:border-slate-200">
               <div>
                 <div class="font-bold text-slate-800">各科均衡能力雷達圖</div>
-                <div class="text-[11px] text-slate-500 mt-0.5">視覺化觀察五育/各學科發展是否偏科</div>
+                <div class="text-xs text-slate-500 mt-0.5">視覺化觀察五育/各學科發展是否偏科</div>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" id="toggleRadarChart" checked onchange="onSettingChanged()" class="sr-only peer">
@@ -148,7 +164,7 @@
             <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 transition hover:border-slate-200">
               <div>
                 <div class="font-bold text-slate-800">歷次定期評量進步趨勢</div>
-                <div class="text-[11px] text-slate-500 mt-0.5">對比期中、期末考走勢，鼓勵自己跟自己比</div>
+                <div class="text-xs text-slate-500 mt-0.5">對比期中、期末考走勢，鼓勵自己跟自己比</div>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" id="toggleTrendChart" checked onchange="onSettingChanged()" class="sr-only peer">
@@ -163,7 +179,7 @@
                   <span>Puti-AI 學習診斷與建議</span>
                   <span class="bg-indigo-100 text-indigo-700 text-[9px] px-1 py-0.2 rounded font-bold">自動去識別化</span>
                 </div>
-                <div class="text-[11px] text-slate-500 mt-0.5">自動根據弱項給予個別化複習指引與溫暖鼓勵</div>
+                <div class="text-xs text-slate-500 mt-0.5">自動根據弱項給予個別化複習指引與溫暖鼓勵</div>
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" id="toggleAICoach" checked onchange="onSettingChanged()" class="sr-only peer">
@@ -178,7 +194,7 @@
                 <option value="birthday">座號 ＋ 生日月日 4 碼 (例如 0101)</option>
                 <option value="idLast4">座號 ＋ 身分證末 4 碼 (例如 1234)</option>
               </select>
-              <div class="text-[10px] text-emerald-700 font-medium">✓ 家長隨時可查，老師完全不用管理重設密碼！</div>
+              <div class="text-xs text-emerald-700 font-medium">✓ 家長隨時可查，老師完全不用管理重設密碼！</div>
             </div>
 
           </div>
@@ -222,7 +238,7 @@
                 </div>
                 <div>
                   <div class="text-xs font-bold text-slate-800">本班專屬查詢網址 & LINE 通知卡</div>
-                  <div class="text-[11px] text-indigo-600 font-mono mt-0.5" id="shareUrlDisplay">https://puti001.github.io/puti-ai-grade/?sheet=1onOnO...</div>
+                  <div class="text-xs text-indigo-600 font-mono mt-0.5" id="shareUrlDisplay">https://puti001.github.io/puti-ai-grade/?sheet=1onOnO...</div>
                 </div>
               </div>
               <div class="flex items-center gap-2 w-full sm:w-auto">
@@ -239,7 +255,7 @@
             <div class="space-y-2">
               <div class="flex items-center justify-between text-xs">
                 <span class="font-bold text-slate-700" id="tableHeaderCount">全班成績名冊（共 10 位學生，由 Google 試算表直接同步）</span>
-                <span class="text-emerald-700 text-[11px] font-bold">🔒 存於老師自己的雲端硬碟</span>
+                <span class="text-emerald-700 text-xs font-bold">🔒 存於老師自己的雲端硬碟</span>
               </div>
               
               <div class="overflow-x-auto border border-slate-200 rounded-xl max-h-72">
@@ -263,7 +279,7 @@
                 <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                 全班五標與統計常模（Puti-AI 自動計算）
               </h4>
-              <span class="text-[11px] text-slate-500" id="fiveMarksStatusInStats">家長端目前：已關閉顯示</span>
+              <span class="text-xs text-slate-500" id="fiveMarksStatusInStats">家長端目前：已關閉顯示</span>
             </div>
             
             <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-xs" id="fiveMarksSummaryGrid">
@@ -302,7 +318,7 @@
           <div>
             <label class="block font-bold text-slate-700 mb-1" id="loginVerifyLabel">驗證密碼（出生月日 4 碼）：</label>
             <input type="text" id="inputVerifyCode" placeholder="例如 1 月 1 日請輸入 0101" class="w-full text-sm p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
-            <p class="text-[11px] text-slate-400 mt-1">※ 若忘記驗證資料，請聯繫導師確認。</p>
+            <p class="text-xs text-slate-400 mt-1">※ 若忘記驗證資料，請聯繫導師確認。</p>
           </div>
 
           <button onclick="parentDoLogin()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md transition text-sm flex items-center justify-center gap-2">
@@ -312,7 +328,7 @@
 
         <!-- 快速測試用點選清單 -->
         <div class="pt-4 border-t border-slate-100 text-center">
-          <span class="text-[11px] text-slate-400 block mb-2">⚡ 快速測試體驗（點擊直接填入）：</span>
+          <span class="text-xs text-slate-400 block mb-2">⚡ 快速測試體驗（點擊直接填入）：</span>
           <div class="flex flex-wrap justify-center gap-1.5 text-xs" id="quickLoginButtons">
             <!-- 動態生成前三位學生的快速登入按鈕 -->
           </div>
@@ -331,7 +347,7 @@
             <div>
               <div class="flex items-center gap-2">
                 <h3 class="text-base font-bold text-slate-900" id="studentDisplayName">王小明 同學</h3>
-                <span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded-full" id="studentSeatBadge">1 號</span>
+                <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-full" id="studentSeatBadge">1 號</span>
               </div>
               <p class="text-xs text-slate-500 mt-0.5" id="studentSubTitle">範例示範學校 301 班 • 第一次定期評量</p>
             </div>
@@ -374,9 +390,9 @@
             <div>
               <h4 class="font-bold text-slate-900 text-sm flex items-center gap-1.5">
                 <span>🎯 五標相對落點分佈</span>
-                <span class="text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded font-normal">落點指標</span>
+                <span class="text-xs bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded font-normal">落點指標</span>
               </h4>
-              <p class="text-[11px] text-slate-500 mt-0.5">彩條標示：底標(12%)、後標(25%)、均標(50%)、前標(75%)、頂標(88%)</p>
+              <p class="text-xs text-slate-500 mt-0.5">彩條標示：底標(12%)、後標(25%)、均標(50%)、前標(75%)、頂標(88%)</p>
             </div>
           </div>
 
@@ -389,7 +405,7 @@
         <div id="radarChartParentSection" class="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-3">
           <div class="flex items-center justify-between border-b border-slate-100 pb-2">
             <h4 class="font-bold text-slate-900 text-sm">🕸️ 各科能力均衡雷達圖</h4>
-            <span class="text-[11px] text-slate-400">觀察五育均衡發展</span>
+            <span class="text-xs text-slate-400">觀察五育均衡發展</span>
           </div>
           <div class="flex justify-center py-2" id="radarSvgContainer">
             <!-- 動態繪製 SVG 雷達圖 -->
@@ -400,7 +416,7 @@
         <div id="trendChartParentSection" class="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-3">
           <div class="flex items-center justify-between border-b border-slate-100 pb-2">
             <h4 class="font-bold text-slate-900 text-sm">📈 歷次評量進步趨勢</h4>
-            <span class="text-[11px] text-emerald-600 font-bold">相較前次 +3.4 分 ⭐</span>
+            <span class="text-xs text-emerald-600 font-bold">相較前次 +3.4 分 ⭐</span>
           </div>
           <div class="py-2" id="trendSvgContainer">
             <!-- 動態繪製 SVG 趨勢折線圖 -->
@@ -416,10 +432,10 @@
               </div>
               <div>
                 <h4 class="font-bold text-slate-900 text-xs">Puti-AI 學習小教練 • 專屬學習處方箋</h4>
-                <p class="text-[10px] text-indigo-700">精準針對本期學科強弱項生成的個別化建議</p>
+                <p class="text-xs text-indigo-700">精準針對本期學科強弱項生成的個別化建議</p>
               </div>
             </div>
-            <span class="text-[10px] px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded-full font-bold">個人化診斷</span>
+            <span class="text-xs px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded-full font-bold">個人化診斷</span>
           </div>
 
           <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-indigo-100 text-xs text-slate-700 space-y-2 leading-relaxed" id="aiCoachAdviceContent">
@@ -433,7 +449,7 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
             <span>一鍵列印 / 另存為個人成績單 (PDF)</span>
           </button>
-          <p class="text-[11px] text-slate-400 mt-2">在手機瀏覽器可直接長按截圖或存為 PDF，無須在雲端硬碟建立檔案。</p>
+          <p class="text-xs text-slate-400 mt-2">在手機瀏覽器可直接長按截圖或存為 PDF，無須在雲端硬碟建立檔案。</p>
         </div>
 
       </div>
@@ -445,7 +461,7 @@
   <!-- ========================================== -->
   <!-- 頁尾：免責聲明與版權資訊 -->
   <!-- ========================================== -->
-  <footer class="bg-white border-t border-slate-200 py-4 px-4 text-center text-xs text-slate-500">
+  <footer class="bg-white border-t border-slate-200 py-5 px-4 text-center text-sm text-slate-600">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
       <div class="flex flex-col sm:flex-row items-center gap-2 text-slate-600">
         <p>屏東縣後庄國小黃朝榮老師作品，免費分享，歡迎擴散推廣，嚴禁商用與任何侵權、不尊重著作權的行為</p>
@@ -478,7 +494,7 @@
       <div class="text-xs text-slate-600 space-y-3.5 leading-relaxed">
         <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-emerald-900">
           <strong>💡 為什麼使用 Google 試算表直連？</strong>
-          <ul class="list-disc pl-4 mt-1 space-y-0.5 text-[11px]">
+          <ul class="list-disc pl-4 mt-1 space-y-0.5 text-xs">
             <li><strong>老師電腦關機照樣查</strong>：Google 試算表託管在 Google 官方伺服器，24 小時在線。</li>
             <li><strong>零個資外洩責任</strong>：所有學生資料 100% 留在老師自己的 Google Drive 裡，本平台完全不儲存。</li>
             <li><strong>即時同步</strong>：老師隨時在試算表修改分數，手機端立刻同步反映！</li>
@@ -490,12 +506,12 @@
             請貼上您的 Google 試算表連結（共用權限設為「知道連結的人均可檢視」）：
           </label>
           <input type="text" id="inputSheetUrl" placeholder="https://docs.google.com/spreadsheets/d/1onOnOId.../edit" class="w-full p-3 font-mono text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
-          <p class="text-[11px] text-slate-400 mt-1">※ 系統僅讀取表內的座號、姓名、出生月日與各科成績，不變更您的試算表內容。</p>
+          <p class="text-xs text-slate-400 mt-1">※ 系統僅讀取表內的座號、姓名、出生月日與各科成績，不變更您的試算表內容。</p>
         </div>
 
         <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
           <div class="font-bold text-slate-700 mb-1">還沒有標準範本？</div>
-          <p class="text-[11px] text-slate-500 mb-2">您可以直接一鍵複製官方標準成績格式，貼上您班級的分數即可使用：</p>
+          <p class="text-xs text-slate-500 mb-2">您可以直接一鍵複製官方標準成績格式，貼上您班級的分數即可使用：</p>
           <a href="https://docs.google.com/spreadsheets/d/1onOnOId5e7Uoxk2lw7MYLJlgx-FKgGLMH_8SK0Nouds/copy" target="_blank" class="inline-block px-3 py-1.5 bg-white border border-slate-300 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-50">
             📑 一鍵建立官方試算表範本副本 ➔
           </a>
@@ -672,7 +688,7 @@
           <td class="p-2.5 font-mono text-slate-500">${s.birthday}</td>
           ${s.scores.map(sc => `<td class="p-2.5 font-mono ${sc>=90?'text-emerald-600 font-bold':''}">${sc}</td>`).join('')}
           <td class="p-2.5 text-center">
-            <button onclick="previewAsParent(${s.seat})" class="text-[11px] text-indigo-600 hover:text-indigo-800 hover:underline font-bold">
+            <button onclick="previewAsParent(${s.seat})" class="text-xs text-indigo-600 hover:text-indigo-800 hover:underline font-bold">
               模擬查榜
             </button>
           </td>
@@ -708,7 +724,7 @@
               <span>${subj}</span>
               <span class="text-indigo-600 font-mono">均 ${s.avg}</span>
             </div>
-            <div class="text-[10px] text-slate-500 mt-1.5 space-y-0.5 font-mono">
+            <div class="text-xs text-slate-500 mt-1.5 space-y-0.5 font-mono">
               <div class="flex justify-between"><span>頂標</span><span class="font-bold text-slate-700">${s.top}</span></div>
               <div class="flex justify-between"><span>前標</span><span>${s.high}</span></div>
               <div class="flex justify-between"><span>均標</span><span>${s.middle}</span></div>
@@ -735,14 +751,14 @@
       const tag = document.getElementById('fiveMarksStatusTag');
       const statsTag = document.getElementById('fiveMarksStatusInStats');
       if (teacherSettings.showFiveMarks) {
-        tag.className = "text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.2 rounded font-bold";
+        tag.className = "text-xs bg-emerald-100 text-emerald-700 px-1.5 py-0.2 rounded font-bold";
         tag.textContent = "已開啟呈現";
-        statsTag.className = "text-[11px] text-emerald-600 font-bold";
+        statsTag.className = "text-xs text-emerald-600 font-bold";
         statsTag.textContent = "家長端目前：將顯示五標圖表";
       } else {
-        tag.className = "text-[10px] bg-red-100 text-red-600 px-1.5 py-0.2 rounded font-normal";
+        tag.className = "text-xs bg-red-100 text-red-600 px-1.5 py-0.2 rounded font-normal";
         tag.textContent = "已隱藏（國小首選）";
-        statsTag.className = "text-[11px] text-slate-400";
+        statsTag.className = "text-xs text-slate-400";
         statsTag.textContent = "家長端目前：已隱藏五標";
       }
     }
@@ -756,7 +772,7 @@
       teacherSettings.authField = document.getElementById('authMethodSelect').value;
 
       document.getElementById('currentPresetBadge').textContent = "自訂模式";
-      document.getElementById('currentPresetBadge').className = "text-[11px] px-2 py-0.5 bg-slate-100 text-slate-700 font-bold rounded-full";
+      document.getElementById('currentPresetBadge').className = "text-xs px-2 py-0.5 bg-slate-100 text-slate-700 font-bold rounded-full";
 
       updateStatusBadges();
 
@@ -776,7 +792,7 @@
           authField: "birthday"
         };
         document.getElementById('currentPresetBadge').textContent = "國小鼓勵模式中";
-        document.getElementById('currentPresetBadge').className = "text-[11px] px-2 py-0.5 bg-amber-100 text-amber-800 font-bold rounded-full";
+        document.getElementById('currentPresetBadge').className = "text-xs px-2 py-0.5 bg-amber-100 text-amber-800 font-bold rounded-full";
       } else {
         teacherSettings = {
           showFiveMarks: true,
@@ -787,7 +803,7 @@
           authField: "birthday"
         };
         document.getElementById('currentPresetBadge').textContent = "國高中升學模式中";
-        document.getElementById('currentPresetBadge').className = "text-[11px] px-2 py-0.5 bg-indigo-100 text-indigo-800 font-bold rounded-full";
+        document.getElementById('currentPresetBadge').className = "text-xs px-2 py-0.5 bg-indigo-100 text-indigo-800 font-bold rounded-full";
       }
       syncToggleInputs();
       if (currentLoggedInStudent) {
@@ -906,7 +922,7 @@
                   ${score >= 90 ? '<span class="text-xs">⭐ 優異</span>' : ''}
                 </div>
                 ${teacherSettings.showClassAverage ? `
-                  <div class="text-[11px] ${diffColor} px-1.5 py-0.5 rounded font-medium inline-block mt-0.5">
+                  <div class="text-xs ${diffColor} px-1.5 py-0.5 rounded font-medium inline-block mt-0.5">
                     ${diffText} (班均 ${classAvg})
                   </div>
                 ` : ''}
@@ -914,7 +930,7 @@
             </div>
             
             <div class="text-right">
-              <span class="text-[11px] px-2.5 py-1 rounded-full font-bold ${
+              <span class="text-xs px-2.5 py-1 rounded-full font-bold ${
                 score >= 90 ? 'bg-emerald-100 text-emerald-800' :
                 score >= 80 ? 'bg-sky-100 text-sky-800' :
                 score >= 60 ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'
@@ -977,7 +993,7 @@
           <div class="space-y-1.5">
             <div class="flex items-center justify-between text-xs">
               <span class="font-bold text-slate-800">${subj}（得分：${score}分）</span>
-              <span class="font-bold ${levelColor} text-[11px]">${levelLabel}</span>
+              <span class="font-bold ${levelColor} text-xs">${levelLabel}</span>
             </div>
 
             <div class="relative w-full h-5 bg-slate-200 rounded-lg overflow-hidden flex text-[9px] font-mono font-bold text-slate-600">
@@ -990,7 +1006,7 @@
               <div style="left: ${Math.min(96, Math.max(4, score))}%" class="absolute top-0 bottom-0 w-2.5 bg-slate-900 border-2 border-white rounded-full shadow-md -translate-x-1/2"></div>
             </div>
 
-            <div class="flex justify-between text-[10px] text-slate-400 font-mono">
+            <div class="flex justify-between text-xs text-slate-400 font-mono">
               <span>底標 ${s.bottom}</span>
               <span>後標 ${s.low}</span>
               <span>均標 ${s.middle}</span>
@@ -1064,7 +1080,7 @@
             <div class="flex flex-col items-center gap-1.5">
               <span class="text-xs font-bold font-mono text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">${h.avg}分</span>
               <div class="w-8 rounded-t-lg bg-gradient-to-t from-indigo-500 to-sky-400" style="height: ${(h.avg - 40) * 2}px"></div>
-              <span class="text-[11px] font-medium text-slate-500 mt-1">${h.name}</span>
+              <span class="text-xs font-medium text-slate-500 mt-1">${h.name}</span>
             </div>
           `).join('')}
         </div>
