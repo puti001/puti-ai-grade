@@ -522,41 +522,43 @@
           </ul>
         </div>
 
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">
-            請貼上您的 Google 試算表連結（共用權限設為「知道連結的人均可檢視」）：
+        <div class="space-y-2">
+          <label class="block font-bold text-slate-800 text-sm">
+            📎 請貼上您的 Google 試算表網址：
           </label>
-          <input type="text" id="inputSheetUrl" placeholder="請貼上您自己的 Google 試算表網址，例如：https://docs.google.com/spreadsheets/d/您的試算表ID/edit" class="w-full p-3 font-mono text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
-          <p class="text-xs text-slate-400 mt-1">※ 系統僅讀取表內的座號、姓名、出生月日與各科成績，不變更您的試算表內容。</p>
+          <input type="text" id="inputSheetUrl" placeholder="例如：https://docs.google.com/spreadsheets/d/您的試算表ID/edit" class="w-full p-3 font-mono text-xs border border-indigo-200 bg-indigo-50/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 text-slate-800 shadow-2xs">
+          <p class="text-xs text-slate-500">※ 請先在試算表右上角「共用」設為【知道連結的使用者均可檢視】。</p>
         </div>
 
-        <div class="space-y-2 p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
-          <div class="flex items-center justify-between">
-            <label class="block font-bold text-slate-800 text-xs">
-              工作表分頁名稱（若有多個考試，以逗號隔開；單次可留空）：
-            </label>
-            <span class="text-xs text-indigo-600 font-bold">✨ 完全自由命名，絕不綁死</span>
+        <div class="p-3.5 bg-emerald-50/80 border border-emerald-200 rounded-2xl flex items-start gap-2.5">
+          <span class="text-xl">✨</span>
+          <div class="text-xs text-emerald-950 leading-relaxed space-y-1">
+            <div class="font-extrabold text-emerald-900 text-xs">全國老師零門檻 • 全自動智慧辨識</div>
+            <p>
+              老師只要<strong>貼上網址即可</strong>！系統會全自動讀取成績，並智慧偵測您試算表中的評量分頁（自動相容<strong>「期中考、期末考」</strong>、<strong>「段考」</strong>、<strong>「定期評量」</strong>等各種命名），<strong>完全不需手動打工作表名稱、零技術負擔！</strong>
+            </p>
           </div>
-          <input type="text" id="inputSheetTabs" value="" placeholder="自訂名稱，例如：期中考, 期末考 或 段考一, 段考二（單一分頁請留空）" class="w-full p-3 font-medium text-xs bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 shadow-2xs">
-          <div class="flex flex-wrap items-center gap-1.5 text-xs pt-0.5">
-            <span class="font-bold text-slate-600">💡 常用參考帶入：</span>
-            <button type="button" onclick="setPresetTabs('midterm')" class="px-2.5 py-1 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 rounded-lg text-slate-700 hover:text-indigo-700 font-medium transition shadow-2xs">
-              期中考、期末考
-            </button>
-            <button type="button" onclick="setPresetTabs('regular')" class="px-2.5 py-1 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 rounded-lg text-slate-700 hover:text-indigo-700 font-medium transition shadow-2xs">
-              第一次、第二次、期末評量
-            </button>
-            <button type="button" onclick="setPresetTabs('exam')" class="px-2.5 py-1 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 rounded-lg text-slate-700 hover:text-indigo-700 font-medium transition shadow-2xs">
-              段考一、段考二、段考三
-            </button>
-            <button type="button" onclick="setPresetTabs('single')" class="px-2 py-1 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-slate-500 transition">
-              清空
-            </button>
-          </div>
-          <p class="text-[11px] text-slate-500 leading-relaxed">
-            ※ <strong>系統 100% 尊重每位老師的自訂命名</strong>（無論您叫段考、月考、平時考、模擬考，只要在上方填寫您試算表底部的名稱即可）。若只查單次評量，此欄直接<strong>留空</strong>即可。
-          </p>
         </div>
+
+        <!-- 隱藏收合的進階自訂選項（99% 老師不用管） -->
+        <details class="text-xs rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+          <summary class="font-bold text-indigo-700 cursor-pointer select-none flex items-center justify-between">
+            <span>⚙️ 進階選項：自訂特殊分頁名稱（一般老師留空即可，系統會自動辨識）</span>
+            <span class="text-[11px] text-slate-400">點此展開 ▼</span>
+          </summary>
+          <div class="mt-3 space-y-2 pt-2 border-t border-slate-200">
+            <label class="block font-medium text-slate-700 text-xs">
+              若您的工作表有特殊自訂名稱（例如：平時一, 平時二），可在下方輸入：
+            </label>
+            <input type="text" id="inputSheetTabs" value="" placeholder="自訂名稱以逗號隔開，留空則由系統全自動辨識" class="w-full p-2.5 font-medium text-xs bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800">
+            <div class="flex flex-wrap items-center gap-1.5 text-xs pt-0.5">
+              <span class="text-slate-500">快速帶入：</span>
+              <button type="button" onclick="setPresetTabs('midterm')" class="px-2 py-0.5 bg-white hover:bg-indigo-50 border border-slate-200 rounded text-slate-600 hover:text-indigo-600">期中考, 期末考</button>
+              <button type="button" onclick="setPresetTabs('regular')" class="px-2 py-0.5 bg-white hover:bg-indigo-50 border border-slate-200 rounded text-slate-600 hover:text-indigo-600">第一次、第二次、期末評量</button>
+              <button type="button" onclick="setPresetTabs('single')" class="px-2 py-0.5 bg-white hover:bg-slate-100 border border-slate-200 rounded text-slate-400">清空</button>
+            </div>
+          </div>
+        </details>
 
         <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
           <div class="font-bold text-slate-800 text-sm">還沒有標準成績格式？</div>
@@ -1331,23 +1333,44 @@
     }
 
     function renderExamTabsUI() {
+      const wrapper = document.getElementById("teacherExamTabsWrapper");
       const container = document.getElementById("teacherExamTabsContainer");
-      if (container) {
-        container.innerHTML = allExams.map((ex, idx) => `
-          <button type="button" onclick="switchExam(${idx})" class="px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${idx === currentExamIndex ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">
-            <span>${ex.name}</span>
-            ${idx === allExams.length - 1 && allExams.length > 1 ? '<span class="bg-indigo-400/40 text-[9px] px-1 py-0.2 rounded text-white">最新</span>' : ''}
-          </button>
-        `).join("");
+      if (wrapper && container) {
+        if (allExams.length <= 1) {
+          wrapper.classList.add("hidden");
+        } else {
+          wrapper.classList.remove("hidden");
+          container.innerHTML = allExams.map((ex, idx) => `
+            <button type="button" onclick="switchExam(${idx})" class="px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${idx === currentExamIndex ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">
+              <span>${ex.name}</span>
+              ${idx === allExams.length - 1 && allExams.length > 1 ? '<span class="bg-indigo-400/40 text-[9px] px-1 py-0.2 rounded text-white">最新</span>' : ''}
+            </button>
+          `).join("");
+        }
       }
 
+      const pContainer = document.getElementById("parentExamSelectorContainer");
       const pSel = document.getElementById("parentExamSelect");
-      if (pSel) {
-        pSel.innerHTML = allExams.map((ex, idx) => `
-          <option value="${idx}" ${idx === currentExamIndex ? 'selected' : ''}>
-            ${ex.name} ${idx === allExams.length - 1 && allExams.length > 1 ? '（最新評量）' : ''}
-          </option>
-        `).join("");
+      if (pContainer && pSel) {
+        if (allExams.length <= 1) {
+          pContainer.classList.add("hidden");
+        } else {
+          pContainer.classList.remove("hidden");
+          pSel.innerHTML = allExams.map((ex, idx) => `
+            <option value="${idx}" ${idx === currentExamIndex ? 'selected' : ''}>
+              ${ex.name} ${idx === allExams.length - 1 && allExams.length > 1 ? '（最新評量）' : ''}
+            </option>
+          `).join("");
+        }
+      }
+
+      const trendSec = document.getElementById("trendChartParentSection");
+      if (trendSec) {
+        if (allExams.length <= 1) {
+          trendSec.classList.add("hidden");
+        } else {
+          trendSec.classList.remove("hidden");
+        }
       }
     }
 
@@ -1357,8 +1380,10 @@
       if (savedId) {
         document.getElementById("inputSheetUrl").value = "https://docs.google.com/spreadsheets/d/" + savedId + "/edit";
       }
-      if (savedTabs) {
+      if (savedTabs && !savedTabs.includes("第一次定期評量, 第二次定期評量")) {
         document.getElementById("inputSheetTabs").value = savedTabs;
+      } else {
+        document.getElementById("inputSheetTabs").value = "";
       }
       document.getElementById("sheetModal").classList.remove("hidden");
     }
@@ -1398,6 +1423,7 @@
 
       let headers = [];
       let startRow = 0;
+      let detectedTitle = "";
 
       if (hasColLabels) {
         headers = colLabels;
@@ -1408,6 +1434,13 @@
           if (cells.some(c => c.includes("座號") || c.includes("姓名") || c.toLowerCase() === "name")) {
             headers = cells;
             startRow = r + 1;
+            for (let tr = 0; tr < r; tr++) {
+              const rowText = (rows[tr].c || []).map(cell => cell && cell.v ? String(cell.f || cell.v).trim() : "").filter(Boolean).join(" ");
+              if (rowText.length > 2 && (rowText.includes("評量") || rowText.includes("考") || rowText.includes("成績") || rowText.includes("年級") || rowText.includes("班"))) {
+                detectedTitle = rowText;
+                break;
+              }
+            }
             break;
           }
         }
@@ -1474,6 +1507,7 @@
       }
 
       return {
+        detectedTitle: detectedTitle,
         subjects: subjects,
         students: students
       };
@@ -1499,8 +1533,12 @@
           try {
             const parsed = parseGoogleSheetData(jsonpData);
             if (parsed.students && parsed.students.length > 0) {
+              const studentDigest = parsed.students.slice(0, 5).map(s => s.name + ':' + s.scores.join(',')).join(';');
               resolve({
-                name: tabName || "定期評量",
+                name: tabName || parsed.detectedTitle || "定期評量",
+                sig: jsonpData.sig || "",
+                digest: (jsonpData.sig || "") + "_" + studentDigest,
+                detectedTitle: parsed.detectedTitle,
                 subjects: parsed.subjects,
                 students: parsed.students
               });
@@ -1532,78 +1570,87 @@
       });
     }
 
-    async function loadGoogleSheetMultiTabs(sheetId, tabNames, isUserAction = false) {
+    async function loadGoogleSheetMultiTabs(sheetId, customTabNames = [], isUserAction = false, defaultGid = "0") {
       if (!sheetId) return;
 
       const btn = document.getElementById("btnConnectSheet");
       if (btn) {
         btn.disabled = true;
-        btn.innerHTML = `<span class="inline-block animate-spin mr-1">🌀</span> 同步試算表中...`;
+        btn.innerHTML = `<span class="inline-block animate-spin mr-1">🌀</span> 智慧辨識同步中...`;
       }
 
       const connectionBadge = document.getElementById("connectionBadge");
       if (connectionBadge) {
         connectionBadge.className = "text-xs font-bold text-sky-800 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded-md flex items-center gap-1";
-        connectionBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-sky-500 animate-ping"></span> 正在讀取評量分頁...`;
+        connectionBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-sky-500 animate-ping"></span> 正在智慧讀取評量資料...`;
       }
 
       let loadedExams = [];
 
-      // 步驟 1：依據使用者指定或預設的分頁名稱嘗試載入
-      for (let i = 0; i < tabNames.length; i++) {
-        const tabName = tabNames[i].trim();
-        if (!tabName) continue;
-        try {
-          const res = await fetchSingleTab(sheetId, tabName);
-          if (res && res.students && res.students.length > 0) {
-            loadedExams.push(res);
-          }
-        } catch (e) {
-          console.warn("Tab " + tabName + " load error:", e);
-        }
-      }
-
-      // 步驟 2：若指定名稱未找到任何分頁，啟動【智慧自動探測】常用分頁組合！
-      if (loadedExams.length === 0) {
-        if (connectionBadge) {
-          connectionBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> 智慧探測分頁中（期中考、期末考...）...`;
-        }
-
-        const candidateSets = [
-          ["期中考", "期末考"],
-          ["第一次定期評量", "第二次定期評量", "期末定期評量"],
-          ["第一次評量", "第二次評量", "期末評量"],
-          ["第1次定期評量", "第2次定期評量", "第3次定期評量"],
-          ["第一次段考", "第二次段考", "期末考"],
-          ["第1次段考", "第2次段考", "第3次段考"],
-          ["工作表1", "工作表2"],
-          ["Sheet1", "Sheet2"]
-        ];
-
-        for (const set of candidateSets) {
-          const firstTab = await fetchSingleTab(sheetId, set[0]);
-          if (firstTab && firstTab.students && firstTab.students.length > 0) {
-            loadedExams.push(firstTab);
-            for (let j = 1; j < set.length; j++) {
-              const nextTab = await fetchSingleTab(sheetId, set[j]);
-              if (nextTab && nextTab.students && nextTab.students.length > 0) {
-                loadedExams.push(nextTab);
-              }
+      // 步驟 1：若老師在進階設定手動指定了分頁名稱
+      if (customTabNames && customTabNames.length > 0) {
+        for (let i = 0; i < customTabNames.length; i++) {
+          const tabName = customTabNames[i].trim();
+          if (!tabName) continue;
+          try {
+            const res = await fetchSingleTab(sheetId, tabName);
+            if (res && res.students && res.students.length > 0) {
+              loadedExams.push(res);
             }
-            break;
-          }
+          } catch (e) {}
         }
       }
 
-      // 步驟 3：若依然沒有，嘗試讀取首頁主工作表 (gid=0)
+      // 步驟 2：若無手動指定（99% 老師情境），啟動【零技術門檻 • 全自動智慧辨識】
       if (loadedExams.length === 0) {
+        let baseTab = null;
         try {
-          const defaultRes = await fetchSingleTab(sheetId, null, "0");
-          if (defaultRes && defaultRes.students && defaultRes.students.length > 0) {
-            defaultRes.name = tabNames[0] || "定期評量";
-            loadedExams.push(defaultRes);
-          }
+          baseTab = await fetchSingleTab(sheetId, null, defaultGid);
         } catch (e) {}
+
+        if (baseTab && baseTab.students && baseTab.students.length > 0) {
+          // 常見評量組合（全台國小、國中常用命名）
+          const candidateSets = [
+            ["期中考", "期末考"],
+            ["第一次定期評量", "第二次定期評量", "期末定期評量"],
+            ["第一次定期評量", "第二次定期評量", "第三次定期評量"],
+            ["第1次定期評量", "第2次定期評量", "第3次定期評量"],
+            ["第一次段考", "第二次段考", "期末考"],
+            ["第一次段考", "第二次段考", "第三次段考"],
+            ["第1次段考", "第2次段考", "第3次段考"],
+            ["工作表1", "工作表2"],
+            ["Sheet1", "Sheet2"]
+          ];
+
+          let matchFound = false;
+
+          for (const candSet of candidateSets) {
+            const [t0, t1] = await Promise.all([
+              fetchSingleTab(sheetId, candSet[0]),
+              fetchSingleTab(sheetId, candSet[1])
+            ]);
+
+            // 若兩者均存在，且特徵 digest 互不相同（代表不是 Google sheets 的 fallback 預設頁）
+            if (t0 && t1 && t0.digest !== t1.digest) {
+              matchFound = true;
+              const setExams = [t0, t1];
+              if (candSet.length > 2) {
+                const t2 = await fetchSingleTab(sheetId, candSet[2]);
+                if (t2 && t2.digest !== t0.digest && t2.digest !== t1.digest) {
+                  setExams.push(t2);
+                }
+              }
+              loadedExams = setExams;
+              break;
+            }
+          }
+
+          // 若沒有探測到多評量組合，則代表為單次評量試算表，直接採用主工作表！
+          if (!matchFound) {
+            baseTab.name = baseTab.detectedTitle || "定期評量";
+            loadedExams = [baseTab];
+          }
+        }
       }
 
       if (btn) {
@@ -1616,7 +1663,7 @@
           connectionBadge.className = "text-xs font-bold text-red-800 bg-red-50 border border-red-200 px-2 py-0.5 rounded-md flex items-center gap-1";
           connectionBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> 連線失敗`;
         }
-        alert("⚠️ 無法讀取試算表中的評量分頁！\n\n請確認：\n1. 試算表右上角「共用」已設為【知道連結的使用者均可檢視】。\n2. 試算表下方的分頁名稱是否為「期中考、期末考」或「第一次定期評量」等。\n\n請確認共用權限後再試一次！");
+        alert("⚠️ 無法讀取試算表！\n\n請確認：\n1. 試算表右上角「共用」已設為【知道連結的使用者均可檢視】。\n2. 表內第一列是否有「座號、姓名、各科成績」欄位。\n\n請確認權限後再試一次！");
         return;
       }
 
@@ -1625,7 +1672,7 @@
       classData.sheetId = sheetId;
       classData.tabs = allExams.map(e => e.name).join(",");
 
-      // 成功同步後，自動儲存至本機記憶 (localStorage)，下次開瀏覽器免再綁定！
+      // 儲存至本機記憶，下次開啟免重設
       localStorage.setItem("puti_bound_sheet_id", sheetId);
       localStorage.setItem("puti_bound_sheet_tabs", classData.tabs);
 
@@ -1635,14 +1682,18 @@
 
       if (isUserAction) {
         const examNames = allExams.map(e => e.name).join("、");
-        alert("🎉 成功同步 Google 試算表！\n\n已成功載入 " + allExams.length + " 個定期評量分頁（" + examNames + "）！\n已自動儲存至本機記憶（下次開啟免再綁定）。\n\n系統已為全班學生建立跨次進步趨勢折線圖與對比分析！");
+        if (allExams.length > 1) {
+          alert(`🎉 成功同步 Google 試算表！\n\n系統已自動智慧辨識載入 ${allExams.length} 次評量：\n【${examNames}】\n\n已自動為全班建立歷次進步趨勢折線圖與成長分析！`);
+        } else {
+          alert(`🎉 成功同步 Google 試算表！\n\n已成功載入【${examNames}】成績資料！\n已自動儲存至本機記憶，下次開啟免再綁定。`);
+        }
       }
     }
 
     function connectCustomSheet() {
       const rawUrl = document.getElementById("inputSheetUrl").value.trim();
       if (!rawUrl) {
-        alert("請輸入 Google 試算表連結！");
+        alert("請貼上您的 Google 試算表網址！");
         return;
       }
 
@@ -1653,13 +1704,13 @@
       }
 
       const extractedId = match[1];
-      const rawTabs = document.getElementById("inputSheetTabs").value.trim();
-      let tabNames = rawTabs.split(/[,，]/).map(t => t.trim()).filter(Boolean);
-      if (tabNames.length === 0) {
-        tabNames = ["第一次定期評量", "第二次定期評量", "期末定期評量"];
-      }
+      const gidMatch = rawUrl.match(/[?#&]gid=([0-9]+)/);
+      const extractedGid = gidMatch ? gidMatch[1] : "0";
 
-      loadGoogleSheetMultiTabs(extractedId, tabNames, true);
+      const rawTabs = document.getElementById("inputSheetTabs").value.trim();
+      let tabNames = rawTabs ? rawTabs.split(/[,，]/).map(t => t.trim()).filter(Boolean) : [];
+
+      loadGoogleSheetMultiTabs(extractedId, tabNames, true, extractedGid);
     }
 
     function resetToDemoData() {
@@ -1706,14 +1757,14 @@
       const paramTabs = urlParams.get("tabs");
 
       if (paramSheet) {
-        const tabList = paramTabs ? paramTabs.split(",").map(t => decodeURIComponent(t.trim())).filter(Boolean) : ["第一次定期評量", "第二次定期評量", "期末定期評量"];
+        const tabList = paramTabs ? paramTabs.split(",").map(t => decodeURIComponent(t.trim())).filter(Boolean) : [];
         loadGoogleSheetMultiTabs(paramSheet, tabList, false);
         switchView("parent");
       } else {
         const savedSheet = localStorage.getItem("puti_bound_sheet_id");
         const savedTabs = localStorage.getItem("puti_bound_sheet_tabs");
         if (savedSheet) {
-          const tabList = savedTabs ? savedTabs.split(",").map(t => t.trim()).filter(Boolean) : ["第一次定期評量", "第二次定期評量", "期末定期評量"];
+          const tabList = savedTabs ? savedTabs.split(",").map(t => t.trim()).filter(Boolean) : [];
           loadGoogleSheetMultiTabs(savedSheet, tabList, false);
         }
       }
