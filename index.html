@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puti-AI 雲端成績平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    @media print {
+      body * { visibility: hidden; }
+      #printableReport, #printableReport * { visibility: visible; }
+      #printableReport { position: absolute; left: 0; top: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- ========================================== -->
+  <!-- 頂部導航列 -->
+  <!-- ========================================== -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-sky-500 flex items-center justify-center text-white shadow-md font-bold text-lg">
+          P
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base font-bold text-slate-900 leading-tight">Puti-AI 雲端成績平台</h1>
+            <span class="bg-indigo-100 text-indigo-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Google 試算表直連版</span>
+          </div>
+          <p class="text-xs text-slate-500">全國教師自訂發布 × 家長極速手機查詢系統（零伺服器儲存）</p>
+        </div>
+      </div>
+
+      <!-- 右側：視角切換器 ＋ 免責聲明按鈕 -->
+      <div class="flex items-center gap-2">
+        <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-medium">
+          <button id="viewTeacherBtn" onclick="switchView('teacher')" class="px-3.5 py-1.5 rounded-lg bg-white text-indigo-700 shadow-sm transition font-bold flex items-center gap-1.5">
+            <span>👩‍🏫 老師管理後台</span>
+            <span class="bg-indigo-100 text-indigo-700 text-[10px] px-1.5 py-0.5 rounded-full">自訂五標</span>
+          </button>
+          <button id="viewParentBtn" onclick="switchView('parent')" class="px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5">
+            <span>📱 家長手機查詢端</span>
+            <span class="bg-emerald-100 text-emerald-700 text-[10px] px-1.5 py-0.5 rounded-full">免記密碼</span>
+          </button>
+        </div>
+
+        <button onclick="openDisclaimerModal()" class="px-2.5 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs flex items-center gap-1 transition" title="檢視免責與隱私聲明">
+          <span>📜</span>
+          <span class="hidden sm:inline">免責聲明</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================== -->
+  <!-- 主內容區 -->
+  <!-- ========================================== -->
+  <main class="max-w-7xl mx-auto px-4 py-6 w-full flex-1">
+
+    <!-- ========================================== -->
+    <!-- 1. 老師管理後台 (Teacher Console) -->
+    <!-- ========================================== -->
+    <section id="teacherView" class="space-y-6">
+      
+      <!-- 頂部提示卡：解法 1 架構說明 -->
+      <div class="bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-transparent border border-emerald-200/80 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2 mb-1.5">
+            <span class="bg-emerald-600 text-white text-[11px] font-bold px-2 py-0.5 rounded">Google 雲端直連架構</span>
+            <span class="text-xs text-emerald-800 font-medium">資料存放在老師自己的 Google 試算表，電腦關機照樣 24h 查詢！</span>
+          </div>
+          <h2 class="text-lg font-bold text-slate-900">老師只要貼上自己的 Google 試算表網址，立刻建立家長查詢入口</h2>
+          <p class="text-xs text-slate-600 mt-0.5">Puti-AI 僅作為美化讀取器，不存留任何學生個資。老師隨時在試算表修改成績，手機端即時更新！</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="openSheetModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5">
+            <span>🔗 綁定我的 Google 試算表</span>
+          </button>
+          <button onclick="applyPreset('elementary')" class="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold rounded-xl shadow-sm transition">
+            <span>🍎 國小鼓勵模式</span>
+          </button>
+          <button onclick="applyPreset('highschool')" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl shadow-sm transition">
+            <span>🎓 國高中五標模式</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 設定與控制面板 Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- 左欄：開關自訂器 (老師權限核心) -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-5">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <h3 class="font-bold text-slate-900 flex items-center gap-2 text-sm">
+              <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+              家長端呈現開關（自由控制）
+            </h3>
+            <span id="currentPresetBadge" class="text-[11px] px-2 py-0.5 bg-amber-100 text-amber-800 font-bold rounded-full">國小鼓勵模式中</span>
+          </div>
+
+          <!-- 開關群組 -->
+          <div class="space-y-3.5 text-xs">
+            
+            <!-- 開關1：五標落點 -->
+            <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 transition hover:border-slate-200">
+              <div>
+                <div class="font-bold text-slate-800 flex items-center gap-1.5">
+                  <span>五標落點長條圖 (頂/前/均/後/底)</span>
+                  <span id="fiveMarksStatusTag" class="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.2 rounded font-normal">已隱藏</span>
+                </div>
+                <div class="text-[11px] text-slate-500 mt-0.5">國小端避免過度競爭，通常關閉；高中會考強烈建議開啟</div>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="toggleFiveMarks" onchange="onSettingChanged()" class="sr-only peer">
+                <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+              </label>
+            </div>
+
+            <!-- 開關2：班級平均分 -->
+            <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 transition hover:border-slate-200">
+              <div>
+                <div class="font-bold text-slate-800">班級/年級平均對照</div>
+                <div class="text-[11px] text-slate-500 mt-0.5">讓家長了解整體水平，但不顯示最高分與排名</div>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="toggleClassAverage" checked onchange="onSettingChanged()" class="sr-only peer">
+                <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+              </label>
+            </div>
+
+            <!-- 開關3：各科能力雷達圖 -->
+            <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 transition hover:border-slate-200">
+              <div>
+                <div class="font-bold text-slate-800">各科均衡能力雷達圖</div>
+                <div class="text-[11px] text-slate-500 mt-0.5">視覺化觀察五育/各學科發展是否偏科</div>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="toggleRadarChart" checked onchange="onSettingChanged()" class="sr-only peer">
+                <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+              </label>
+            </div>
+
+            <!-- 開關4：歷次進步趨勢折線圖 -->
+            <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 transition hover:border-slate-200">
+              <div>
+                <div class="font-bold text-slate-800">歷次定期評量進步趨勢</div>
+                <div class="text-[11px] text-slate-500 mt-0.5">對比期中、期末考走勢，鼓勵自己跟自己比</div>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="toggleTrendChart" checked onchange="onSettingChanged()" class="sr-only peer">
+                <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+              </label>
+            </div>
+
+            <!-- 開關5：Puti-AI 智能學習處方箋 -->
+            <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 transition hover:border-slate-200">
+              <div>
+                <div class="font-bold text-slate-800 flex items-center gap-1">
+                  <span>Puti-AI 學習診斷與建議</span>
+                  <span class="bg-indigo-100 text-indigo-700 text-[9px] px-1 py-0.2 rounded font-bold">自動去識別化</span>
+                </div>
+                <div class="text-[11px] text-slate-500 mt-0.5">自動根據弱項給予個別化複習指引與溫暖鼓勵</div>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="toggleAICoach" checked onchange="onSettingChanged()" class="sr-only peer">
+                <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+              </label>
+            </div>
+
+            <!-- 開關6：身分驗證欄位 -->
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
+              <div class="font-bold text-slate-800">家長驗證方式（免記帳密）</div>
+              <select id="authMethodSelect" onchange="onSettingChanged()" class="w-full text-xs p-2 rounded-lg border border-slate-200 bg-white">
+                <option value="birthday">座號 ＋ 生日月日 4 碼 (例如 0101)</option>
+                <option value="idLast4">座號 ＋ 身分證末 4 碼 (例如 1234)</option>
+              </select>
+              <div class="text-[10px] text-emerald-700 font-medium">✓ 家長隨時可查，老師完全不用管理重設密碼！</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 中右欄：班級成績資料預覽與發布 -->
+        <div class="lg:col-span-2 space-y-6">
+
+          <!-- 班級基本資訊與 Google 雲端連線卡 -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Google 雲端已連線
+                  </span>
+                  <span class="text-xs text-slate-400 font-mono" id="sheetIdPreview">ID: 1onOnOId...ouds</span>
+                </div>
+                <h3 class="text-base font-bold text-slate-900 mt-1" id="currentClassName">範例示範學校 301 班</h3>
+                <p class="text-xs text-slate-500" id="currentExamName">當前評量：113學年度第一學期 第一次定期評量</p>
+              </div>
+
+              <!-- 操作按鈕群 -->
+              <div class="flex items-center gap-2">
+                <button onclick="openSheetModal()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                  <span>🔄 更換試算表</span>
+                </button>
+                <button onclick="previewAsParent(1)" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1.5">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                  <span>模擬查榜 (1號)</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 分享給家長卡片 -->
+            <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-white p-1 rounded-lg border border-slate-200 flex items-center justify-center font-mono text-[9px] text-center text-slate-400">
+                  <svg class="w-10 h-10 text-slate-700" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4h4v4H4zm2 2h0zm6-2h4v4h-4zm2 2h0zm6-2h4v4h-4zm2 2h0zm-14 6h4v4H4zm2 2h0zm12-2h4v4h-4zm2 2h0zm-14 6h4v4H4zm2 2h0zm6 0h4v4h-4zm6 0h4v4h-4zm-8-6h2v2h-2zm4 0h2v2h-2zm-2 4h2v2h-2z"/></svg>
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-slate-800">本班專屬查詢網址 & LINE 通知卡</div>
+                  <div class="text-[11px] text-indigo-600 font-mono mt-0.5" id="shareUrlDisplay">https://puti001.github.io/puti-ai-grade/?sheet=1onOnO...</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 w-full sm:w-auto">
+                <button onclick="copyShareText()" class="flex-1 sm:flex-initial px-3 py-1.5 bg-white border border-slate-200 hover:border-slate-300 text-slate-700 rounded-lg text-xs font-medium transition">
+                  📋 複製 LINE 通知文案
+                </button>
+                <button onclick="switchView('parent')" class="flex-1 sm:flex-initial px-3 py-1.5 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-medium transition">
+                  前往家長端 ➔
+                </button>
+              </div>
+            </div>
+
+            <!-- 學生資料表格 -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-slate-700" id="tableHeaderCount">全班成績名冊（共 10 位學生，由 Google 試算表直接同步）</span>
+                <span class="text-emerald-700 text-[11px] font-bold">🔒 存於老師自己的雲端硬碟</span>
+              </div>
+              
+              <div class="overflow-x-auto border border-slate-200 rounded-xl max-h-72">
+                <table class="w-full text-left text-xs text-slate-700">
+                  <thead class="bg-slate-100 text-slate-700 sticky top-0 border-b border-slate-200" id="teacherTableHead">
+                    <!-- 動態產出表頭 -->
+                  </thead>
+                  <tbody id="teacherTableBody" class="divide-y divide-slate-100 bg-white">
+                    <!-- 動態渲染學生列表 -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- 全班統計五標對照表 -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+              <h4 class="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                全班五標與統計常模（Puti-AI 自動計算）
+              </h4>
+              <span class="text-[11px] text-slate-500" id="fiveMarksStatusInStats">家長端目前：已關閉顯示</span>
+            </div>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-xs" id="fiveMarksSummaryGrid">
+              <!-- 動態產出科目五標小卡 -->
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ========================================== -->
+    <!-- 2. 家長/學生查詢端 (Parent/Student Mobile) -->
+    <!-- ========================================== -->
+    <section id="parentView" class="hidden max-w-xl mx-auto space-y-6">
+
+      <!-- 登入卡片 (若未登入) -->
+      <div id="parentLoginForm" class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-md space-y-5">
+        <div class="text-center space-y-1.5">
+          <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl mx-auto flex items-center justify-center text-2xl shadow-inner font-bold">
+            P
+          </div>
+          <h2 class="text-xl font-bold text-slate-900" id="parentLoginSchoolTitle">範例示範學校 301 班</h2>
+          <p class="text-xs text-slate-500" id="parentLoginExamTitle">113學年度第一學期 個人評量成績查詢</p>
+        </div>
+
+        <div class="space-y-4 text-xs">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">學生座號：</label>
+            <input type="number" id="inputSeatNo" placeholder="請輸入座號（例如：1 或 3）" class="w-full text-sm p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1" id="loginVerifyLabel">驗證密碼（出生月日 4 碼）：</label>
+            <input type="text" id="inputVerifyCode" placeholder="例如 1 月 1 日請輸入 0101" class="w-full text-sm p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+            <p class="text-[11px] text-slate-400 mt-1">※ 若忘記驗證資料，請聯繫導師確認。</p>
+          </div>
+
+          <button onclick="parentDoLogin()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md transition text-sm flex items-center justify-center gap-2">
+            <span>查詢個人成績 ➔</span>
+          </button>
+        </div>
+
+        <!-- 快速測試用點選清單 -->
+        <div class="pt-4 border-t border-slate-100 text-center">
+          <span class="text-[11px] text-slate-400 block mb-2">⚡ 快速測試體驗（點擊直接填入）：</span>
+          <div class="flex flex-wrap justify-center gap-1.5 text-xs" id="quickLoginButtons">
+            <!-- 動態生成前三位學生的快速登入按鈕 -->
+          </div>
+        </div>
+      </div>
+
+      <!-- 成績結果畫面 (登入後) -->
+      <div id="parentResultCard" class="hidden space-y-5">
+
+        <!-- 學生基本抬頭卡 -->
+        <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-gradient-to-tr from-amber-400 to-rose-400 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-sm">
+              <span id="studentAvatarText">王</span>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="text-base font-bold text-slate-900" id="studentDisplayName">王小明 同學</h3>
+                <span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded-full" id="studentSeatBadge">1 號</span>
+              </div>
+              <p class="text-xs text-slate-500 mt-0.5" id="studentSubTitle">範例示範學校 301 班 • 第一次定期評量</p>
+            </div>
+          </div>
+          <button onclick="parentLogout()" class="text-xs text-slate-400 hover:text-slate-600 px-2 py-1 rounded-lg hover:bg-slate-50 transition">
+            登出
+          </button>
+        </div>
+
+        <!-- 導師溫馨評語 -->
+        <div id="teacherNoteCard" class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 rounded-2xl p-4 text-xs space-y-1">
+          <div class="flex items-center gap-1.5 font-bold text-amber-900">
+            <span>💌 導師給孩子的鼓勵：</span>
+          </div>
+          <p class="text-amber-800 leading-relaxed" id="studentTeacherNote">
+            課堂學習態度認真，思維活潑，繼續保持這份探索的熱情！
+          </p>
+        </div>
+
+        <!-- 各科成績卡片區 -->
+        <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h4 class="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+              <span>📊 各科評量表現</span>
+            </h4>
+            <div class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg" id="totalScoreBadge">
+              總分：446 分 / 平均：89.2
+            </div>
+          </div>
+
+          <!-- 各科卡片清單 -->
+          <div class="space-y-3" id="subjectCardsContainer">
+            <!-- 動態插入各科條目 -->
+          </div>
+        </div>
+
+        <!-- 五標落點視覺化（根據開關動態顯示/隱藏） -->
+        <div id="fiveMarksParentSection" class="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div>
+              <h4 class="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                <span>🎯 五標相對落點分佈</span>
+                <span class="text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded font-normal">落點指標</span>
+              </h4>
+              <p class="text-[11px] text-slate-500 mt-0.5">彩條標示：底標(12%)、後標(25%)、均標(50%)、前標(75%)、頂標(88%)</p>
+            </div>
+          </div>
+
+          <div class="space-y-4" id="fiveMarksParentContainer">
+            <!-- 動態渲染各科五標長條圖 -->
+          </div>
+        </div>
+
+        <!-- 能力平衡雷達圖 -->
+        <div id="radarChartParentSection" class="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <h4 class="font-bold text-slate-900 text-sm">🕸️ 各科能力均衡雷達圖</h4>
+            <span class="text-[11px] text-slate-400">觀察五育均衡發展</span>
+          </div>
+          <div class="flex justify-center py-2" id="radarSvgContainer">
+            <!-- 動態繪製 SVG 雷達圖 -->
+          </div>
+        </div>
+
+        <!-- 歷次評量趨勢折線圖 -->
+        <div id="trendChartParentSection" class="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <h4 class="font-bold text-slate-900 text-sm">📈 歷次評量進步趨勢</h4>
+            <span class="text-[11px] text-emerald-600 font-bold">相較前次 +3.4 分 ⭐</span>
+          </div>
+          <div class="py-2" id="trendSvgContainer">
+            <!-- 動態繪製 SVG 趨勢折線圖 -->
+          </div>
+        </div>
+
+        <!-- Puti-AI 智能學習顧問卡 -->
+        <div id="aiCoachParentSection" class="bg-gradient-to-br from-indigo-50 via-sky-50 to-white rounded-3xl border border-indigo-200/80 p-5 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-sm shadow-sm font-bold">
+                P
+              </div>
+              <div>
+                <h4 class="font-bold text-slate-900 text-xs">Puti-AI 學習小教練 • 專屬學習處方箋</h4>
+                <p class="text-[10px] text-indigo-700">精準針對本期學科強弱項生成的個別化建議</p>
+              </div>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded-full font-bold">個人化診斷</span>
+          </div>
+
+          <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-indigo-100 text-xs text-slate-700 space-y-2 leading-relaxed" id="aiCoachAdviceContent">
+            <!-- 動態生成 AI 分析建議 -->
+          </div>
+        </div>
+
+        <!-- 儲存成績單卡片 / 列印 -->
+        <div class="pt-2 text-center pb-8">
+          <button onclick="window.print()" class="px-5 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-xs font-bold shadow-md transition inline-flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+            <span>一鍵列印 / 另存為個人成績單 (PDF)</span>
+          </button>
+          <p class="text-[11px] text-slate-400 mt-2">在手機瀏覽器可直接長按截圖或存為 PDF，無須在雲端硬碟建立檔案。</p>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- 頁尾：免責聲明與版權資訊 -->
+  <!-- ========================================== -->
+  <footer class="bg-white border-t border-slate-200 py-4 px-4 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p>Puti-AI 雲端成績平台 © 2026 • 由教師社群為全國教育同仁公益打造</p>
+      <div class="flex items-center gap-3">
+        <button onclick="openDisclaimerModal()" class="text-indigo-600 hover:underline font-medium">免責聲明與隱私條款</button>
+        <span>•</span>
+        <span class="text-slate-400">Google 試算表直連架構（零資料庫儲存）</span>
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- ========================================== -->
+  <!-- 彈窗 1：Google 試算表綁定彈窗 (Google Sheets Connector) -->
+  <!-- ========================================== -->
+  <div id="sheetModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+          <span>🔗 綁定老師自己的 Google 試算表（解法 1）</span>
+        </h3>
+        <button onclick="closeSheetModal()" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+      </div>
+
+      <div class="text-xs text-slate-600 space-y-3.5 leading-relaxed">
+        <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-emerald-900">
+          <strong>💡 為什麼使用 Google 試算表直連？</strong>
+          <ul class="list-disc pl-4 mt-1 space-y-0.5 text-[11px]">
+            <li><strong>老師電腦關機照樣查</strong>：Google 試算表託管在 Google 官方伺服器，24 小時在線。</li>
+            <li><strong>零個資外洩責任</strong>：所有學生資料 100% 留在老師自己的 Google Drive 裡，本平台完全不儲存。</li>
+            <li><strong>即時同步</strong>：老師隨時在試算表修改分數，手機端立刻同步反映！</li>
+          </ul>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">
+            請貼上您的 Google 試算表連結（共用權限設為「知道連結的人均可檢視」）：
+          </label>
+          <input type="text" id="inputSheetUrl" placeholder="https://docs.google.com/spreadsheets/d/1onOnOId.../edit" class="w-full p-3 font-mono text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+          <p class="text-[11px] text-slate-400 mt-1">※ 系統僅讀取表內的座號、姓名、出生月日與各科成績，不變更您的試算表內容。</p>
+        </div>
+
+        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+          <div class="font-bold text-slate-700 mb-1">還沒有標準範本？</div>
+          <p class="text-[11px] text-slate-500 mb-2">您可以直接一鍵複製官方標準成績格式，貼上您班級的分數即可使用：</p>
+          <a href="https://docs.google.com/spreadsheets/d/1onOnOId5e7Uoxk2lw7MYLJlgx-FKgGLMH_8SK0Nouds/copy" target="_blank" class="inline-block px-3 py-1.5 bg-white border border-slate-300 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-50">
+            📑 一鍵建立官方試算表範本副本 ➔
+          </a>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+        <button onclick="closeSheetModal()" class="px-4 py-2 border border-slate-200 rounded-xl text-xs text-slate-600 hover:bg-slate-50">
+          取消
+        </button>
+        <button onclick="connectCustomSheet()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-md">
+          確認連線並產生班級網址
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================== -->
+  <!-- 彈窗 2：免責聲明與使用條款 (Disclaimer Modal) -->
+  <!-- ========================================== -->
+  <div id="disclaimerModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+          <span>📜 Puti-AI 雲端成績平台 • 免責聲明與使用條款</span>
+        </h3>
+        <button onclick="closeDisclaimerModal()" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+      </div>
+
+      <div class="text-xs text-slate-600 space-y-3.5 leading-relaxed">
+        
+        <div class="p-3 bg-indigo-50/70 border border-indigo-100 rounded-xl text-indigo-950 space-y-1">
+          <h4 class="font-bold flex items-center gap-1.5 text-xs">
+            <span>一、 公益與教育推廣初衷</span>
+          </h4>
+          <p>
+            本平台為教育現場教師本於教育公益熱忱獨立開發，旨在提供全台中小學及高中教師一個便利、視覺化且注重隱私的班級成績輔導工具。本服務<strong>完全免費</strong>，不向任何學校、教師、學生或家長收取費用。
+          </p>
+        </div>
+
+        <div class="space-y-1">
+          <h4 class="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+            <span>二、 零個資儲存與隱私保護承諾（解法 1 架構）</span>
+          </h4>
+          <p class="text-slate-600">
+            本系統採用 Google 試算表直接連線技術，各班之成績與名冊資料<strong>全數保留於各校老師個人之 Google 雲端硬碟中，Puti-AI 伺服器與開發者「完全不儲存、亦不持有」任何學生之個資與分數</strong>。無中央伺服器遭駭外洩之風險，請各位老師與家長安心。
+          </p>
+        </div>
+
+        <div class="space-y-1">
+          <h4 class="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+            <span>三、 原始資料自行妥善備份原則</span>
+          </h4>
+          <p class="text-slate-600">
+            因開發者伺服器無儲存各班級資料，<strong>本平台不負任何資料維護、託管、保管或復原之義務</strong>。老師務必自行於校內正式之 Google 試算表或本機 Excel 妥善留存原始成績備份，切勿將本平台作為唯一資料保存處。
+          </p>
+        </div>
+
+        <div class="space-y-1">
+          <h4 class="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+            <span>四、 服務可用性與免責聲明</span>
+          </h4>
+          <p class="text-slate-600">
+            本服務為個人實驗與測試性質，<strong>不保證系統能夠長期、永久、不間斷或毫無錯誤地正常運行</strong>。對於因網路連線異常、Google API 配額調整或不可抗力所導致之連線中斷或展示異常，開發者不承擔任何形式之保證或直接、間接損害賠償責任；作者保留隨時維護、更新、調整或終止服務之權利。
+          </p>
+        </div>
+
+        <div class="space-y-1">
+          <h4 class="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+            <span>五、 非官方正式學籍證明</span>
+          </h4>
+          <p class="text-slate-600">
+            本系統之成績與分析報告僅供親師生課堂輔導與日常學習參考；所有正式學業成績與學籍紀錄，一律以各校教務處或校方正式用印公布之成績單為唯一官方依據。
+          </p>
+        </div>
+
+      </div>
+
+      <div class="pt-3 border-t border-slate-100 text-right">
+        <button onclick="closeDisclaimerModal()" class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition">
+          我已充分理解並同意
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================== -->
+  <!-- JavaScript 資料邏輯與動態渲染 -->
+  <!-- ========================================== -->
+  <script>
+    // 預設純虛擬示範資料庫
+    let classData = {
+      sheetId: "1onOnOId5e7Uoxk2lw7MYLJlgx-FKgGLMH_8SK0Nouds",
+      school: "範例示範學校",
+      className: "301 班",
+      examName: "113學年度第一學期 第一次定期評量",
+      subjects: ["國語", "數學", "英語", "自然", "社會"],
+      students: [
+        { seat: 1, name: "王小明", birthday: "0101", idLast4: "1234", scores: [92, 95, 88, 91, 80], note: "小明本學期發言非常主動，數學邏輯思考敏捷，國語生字工整進步顯著！" },
+        { seat: 2, name: "李大同", birthday: "0202", idLast4: "2345", scores: [85, 78, 80, 84, 75], note: "大同課堂專注度提升，自然實驗觀察敏銳，數學多做題目會更加熟練！" },
+        { seat: 3, name: "林美美", birthday: "0303", idLast4: "3456", scores: [96, 98, 95, 94, 92], note: "美美表現沉穩優異，各科均衡全面，是全班同學的學習楷模！" },
+        { seat: 4, name: "張志強", birthday: "0404", idLast4: "4567", scores: [76, 68, 72, 80, 70], note: "志強熱心參與班級事務，若在數學幾何與應用題稍加練習，一定能大步前進！" },
+        { seat: 5, name: "趙小敏", birthday: "0505", idLast4: "5678", scores: [88, 82, 85, 86, 84], note: "小敏學習態度積極認真，各科都有穩定表現，再接再厲！" },
+        { seat: 6, name: "陳建國", birthday: "0606", idLast4: "6789", scores: [79, 85, 76, 82, 78], note: "建國思維活潑，數學反應敏捷，英語單字多朗讀會更有信心！" },
+        { seat: 7, name: "周雅婷", birthday: "0707", idLast4: "7890", scores: [90, 88, 92, 89, 85], note: "雅婷作業書寫工整，喜愛閱讀各類課外書，表現可圈可點！" },
+        { seat: 8, name: "吳冠宇", birthday: "0808", idLast4: "8901", scores: [84, 76, 81, 79, 74], note: "冠宇待人有禮，上課能跟上節奏，考前若能多複習弱項成績會更棒！" },
+        { seat: 9, name: "蔡佳穎", birthday: "0909", idLast4: "9012", scores: [94, 91, 89, 93, 88], note: "佳穎理解能力強，課堂互動積極，各科成績均十分亮眼！" },
+        { seat: 10, name: "黃柏翰", birthday: "1010", idLast4: "0123", scores: [81, 84, 78, 85, 80], note: "柏翰做事細心負責，科學實驗很有探究精神，非常棒！" }
+      ],
+      historyScores: {
+        1: [
+          { name: "開學考", avg: 82.5 },
+          { name: "第一次評量", avg: 89.2 }
+        ],
+        3: [
+          { name: "開學考", avg: 92.0 },
+          { name: "第一次評量", avg: 95.0 }
+        ]
+      }
+    };
+
+    let teacherSettings = {
+      showFiveMarks: false,
+      showClassAverage: true,
+      showRadarChart: true,
+      showTrendChart: true,
+      showAICoach: true,
+      authField: "birthday"
+    };
+
+    let currentLoggedInStudent = null;
+    let classStats = {};
+
+    function calculateClassStats() {
+      const stats = {};
+      classData.subjects.forEach((subj, idx) => {
+        const scores = classData.students.map(s => s.scores[idx] || 0).sort((a, b) => a - b);
+        const n = scores.length;
+        const avg = n > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / n) : 0;
+        
+        stats[subj] = {
+          avg: avg,
+          top: scores[Math.max(0, Math.ceil(n * 0.88) - 1)] || 0,
+          high: scores[Math.max(0, Math.ceil(n * 0.75) - 1)] || 0,
+          middle: scores[Math.max(0, Math.ceil(n * 0.50) - 1)] || 0,
+          low: scores[Math.max(0, Math.ceil(n * 0.25) - 1)] || 0,
+          bottom: scores[Math.max(0, Math.ceil(n * 0.12) - 1)] || 0
+        };
+      });
+      return stats;
+    }
+
+    function initTeacherConsole() {
+      classStats = calculateClassStats();
+
+      const thead = document.getElementById('teacherTableHead');
+      thead.innerHTML = `
+        <tr>
+          <th class="p-2.5 font-bold">座號</th>
+          <th class="p-2.5 font-bold">姓名</th>
+          <th class="p-2.5 font-bold">出生月日</th>
+          ${classData.subjects.map(s => `<th class="p-2.5 font-bold">${s}</th>`).join('')}
+          <th class="p-2.5 font-bold text-center">操作</th>
+        </tr>
+      `;
+
+      const tbody = document.getElementById('teacherTableBody');
+      tbody.innerHTML = classData.students.map(s => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="p-2.5 font-bold">${s.seat}</td>
+          <td class="p-2.5 font-medium text-slate-900">${s.name}</td>
+          <td class="p-2.5 font-mono text-slate-500">${s.birthday}</td>
+          ${s.scores.map(sc => `<td class="p-2.5 font-mono ${sc>=90?'text-emerald-600 font-bold':''}">${sc}</td>`).join('')}
+          <td class="p-2.5 text-center">
+            <button onclick="previewAsParent(${s.seat})" class="text-[11px] text-indigo-600 hover:text-indigo-800 hover:underline font-bold">
+              模擬查榜
+            </button>
+          </td>
+        </tr>
+      `).join('');
+
+      document.getElementById('currentClassName').textContent = `${classData.school} ${classData.className}`;
+      document.getElementById('currentExamName').textContent = `當前評量：${classData.examName}`;
+      document.getElementById('tableHeaderCount').textContent = `全班成績名冊（共 ${classData.students.length} 位學生，由 Google 試算表直接同步）`;
+      document.getElementById('parentLoginSchoolTitle').textContent = `${classData.school} ${classData.className}`;
+      document.getElementById('parentLoginExamTitle').textContent = classData.examName;
+      document.getElementById('sheetIdPreview').textContent = `ID: ${classData.sheetId.slice(0, 8)}...${classData.sheetId.slice(-4)}`;
+      document.getElementById('shareUrlDisplay').textContent = `https://puti001.github.io/puti-ai-grade/?sheet=${classData.sheetId.slice(0, 10)}`;
+
+      const quickBox = document.getElementById('quickLoginButtons');
+      quickBox.innerHTML = classData.students.slice(0, 4).map(s => `
+        <button onclick="quickFill(${s.seat}, '${s.birthday}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg">
+          ${s.seat}號 ${s.name} (${s.birthday})
+        </button>
+      `).join('');
+
+      renderFiveMarksStats();
+      syncToggleInputs();
+    }
+
+    function renderFiveMarksStats() {
+      const grid = document.getElementById('fiveMarksSummaryGrid');
+      grid.innerHTML = classData.subjects.map(subj => {
+        const s = classStats[subj];
+        return `
+          <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+            <div class="font-bold text-slate-800 text-xs flex justify-between">
+              <span>${subj}</span>
+              <span class="text-indigo-600 font-mono">均 ${s.avg}</span>
+            </div>
+            <div class="text-[10px] text-slate-500 mt-1.5 space-y-0.5 font-mono">
+              <div class="flex justify-between"><span>頂標</span><span class="font-bold text-slate-700">${s.top}</span></div>
+              <div class="flex justify-between"><span>前標</span><span>${s.high}</span></div>
+              <div class="flex justify-between"><span>均標</span><span>${s.middle}</span></div>
+              <div class="flex justify-between"><span>後標</span><span>${s.low}</span></div>
+              <div class="flex justify-between"><span>底標</span><span class="text-slate-400">${s.bottom}</span></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function syncToggleInputs() {
+      document.getElementById('toggleFiveMarks').checked = teacherSettings.showFiveMarks;
+      document.getElementById('toggleClassAverage').checked = teacherSettings.showClassAverage;
+      document.getElementById('toggleRadarChart').checked = teacherSettings.showRadarChart;
+      document.getElementById('toggleTrendChart').checked = teacherSettings.showTrendChart;
+      document.getElementById('toggleAICoach').checked = teacherSettings.showAICoach;
+      document.getElementById('authMethodSelect').value = teacherSettings.authField;
+
+      updateStatusBadges();
+    }
+
+    function updateStatusBadges() {
+      const tag = document.getElementById('fiveMarksStatusTag');
+      const statsTag = document.getElementById('fiveMarksStatusInStats');
+      if (teacherSettings.showFiveMarks) {
+        tag.className = "text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.2 rounded font-bold";
+        tag.textContent = "已開啟呈現";
+        statsTag.className = "text-[11px] text-emerald-600 font-bold";
+        statsTag.textContent = "家長端目前：將顯示五標圖表";
+      } else {
+        tag.className = "text-[10px] bg-red-100 text-red-600 px-1.5 py-0.2 rounded font-normal";
+        tag.textContent = "已隱藏（國小首選）";
+        statsTag.className = "text-[11px] text-slate-400";
+        statsTag.textContent = "家長端目前：已隱藏五標";
+      }
+    }
+
+    function onSettingChanged() {
+      teacherSettings.showFiveMarks = document.getElementById('toggleFiveMarks').checked;
+      teacherSettings.showClassAverage = document.getElementById('toggleClassAverage').checked;
+      teacherSettings.showRadarChart = document.getElementById('toggleRadarChart').checked;
+      teacherSettings.showTrendChart = document.getElementById('toggleTrendChart').checked;
+      teacherSettings.showAICoach = document.getElementById('toggleAICoach').checked;
+      teacherSettings.authField = document.getElementById('authMethodSelect').value;
+
+      document.getElementById('currentPresetBadge').textContent = "自訂模式";
+      document.getElementById('currentPresetBadge').className = "text-[11px] px-2 py-0.5 bg-slate-100 text-slate-700 font-bold rounded-full";
+
+      updateStatusBadges();
+
+      if (currentLoggedInStudent) {
+        renderStudentResult(currentLoggedInStudent);
+      }
+    }
+
+    function applyPreset(type) {
+      if (type === 'elementary') {
+        teacherSettings = {
+          showFiveMarks: false,
+          showClassAverage: true,
+          showRadarChart: true,
+          showTrendChart: true,
+          showAICoach: true,
+          authField: "birthday"
+        };
+        document.getElementById('currentPresetBadge').textContent = "國小鼓勵模式中";
+        document.getElementById('currentPresetBadge').className = "text-[11px] px-2 py-0.5 bg-amber-100 text-amber-800 font-bold rounded-full";
+      } else {
+        teacherSettings = {
+          showFiveMarks: true,
+          showClassAverage: true,
+          showRadarChart: true,
+          showTrendChart: true,
+          showAICoach: true,
+          authField: "birthday"
+        };
+        document.getElementById('currentPresetBadge').textContent = "國高中升學模式中";
+        document.getElementById('currentPresetBadge').className = "text-[11px] px-2 py-0.5 bg-indigo-100 text-indigo-800 font-bold rounded-full";
+      }
+      syncToggleInputs();
+      if (currentLoggedInStudent) {
+        renderStudentResult(currentLoggedInStudent);
+      }
+    }
+
+    function copyShareText() {
+      const text = `【${classData.school} ${classData.className} ${classData.examName} 成績查詢通知】\n各位家長您好，本次評量成績已開放查詢。請點擊專屬連結，輸入學生座號與出生月日即可查閱個人成績及學習診斷報告：\n👉 https://puti001.github.io/puti-ai-grade/?sheet=${classData.sheetId}`;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("已成功複製 LINE 通知文案！您可以直接貼到班級群組發給家長。");
+      });
+    }
+
+    function switchView(view) {
+      const teacherSec = document.getElementById('teacherView');
+      const parentSec = document.getElementById('parentView');
+      const teacherBtn = document.getElementById('viewTeacherBtn');
+      const parentBtn = document.getElementById('viewParentBtn');
+
+      if (view === 'teacher') {
+        teacherSec.classList.remove('hidden');
+        parentSec.classList.add('hidden');
+        teacherBtn.className = "px-3.5 py-1.5 rounded-lg bg-white text-indigo-700 shadow-sm transition font-bold flex items-center gap-1.5";
+        parentBtn.className = "px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5";
+      } else {
+        teacherSec.classList.add('hidden');
+        parentSec.classList.remove('hidden');
+        parentBtn.className = "px-3.5 py-1.5 rounded-lg bg-white text-indigo-700 shadow-sm transition font-bold flex items-center gap-1.5";
+        teacherBtn.className = "px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5";
+      }
+    }
+
+    function quickFill(seat, code) {
+      document.getElementById('inputSeatNo').value = seat;
+      document.getElementById('inputVerifyCode').value = code;
+      parentDoLogin();
+    }
+
+    function previewAsParent(seatNo) {
+      const student = classData.students.find(s => s.seat === seatNo);
+      if (student) {
+        currentLoggedInStudent = student;
+        switchView('parent');
+        document.getElementById('parentLoginForm').classList.add('hidden');
+        document.getElementById('parentResultCard').classList.remove('hidden');
+        renderStudentResult(student);
+      }
+    }
+
+    function parentDoLogin() {
+      const seat = parseInt(document.getElementById('inputSeatNo').value);
+      const code = document.getElementById('inputVerifyCode').value.trim();
+
+      if (!seat || !code) {
+        alert("請輸入座號與驗證密碼！");
+        return;
+      }
+
+      const student = classData.students.find(s => s.seat === seat);
+      if (!student) {
+        alert("找不到此座號，請核對後重新輸入！");
+        return;
+      }
+
+      let isMatch = false;
+      if (teacherSettings.authField === 'birthday' && student.birthday === code) isMatch = true;
+      if (teacherSettings.authField === 'idLast4' && student.idLast4 === code) isMatch = true;
+
+      if (!isMatch) {
+        alert("驗證密碼錯誤！請輸入該生出生月日 4 碼（例如 1 月 1 日請輸入 0101）。");
+        return;
+      }
+
+      currentLoggedInStudent = student;
+      document.getElementById('parentLoginForm').classList.add('hidden');
+      document.getElementById('parentResultCard').classList.remove('hidden');
+      renderStudentResult(student);
+    }
+
+    function parentLogout() {
+      currentLoggedInStudent = null;
+      document.getElementById('parentResultCard').classList.add('hidden');
+      document.getElementById('parentLoginForm').classList.remove('hidden');
+    }
+
+    function renderStudentResult(student) {
+      document.getElementById('studentAvatarText').textContent = student.name.charAt(0);
+      document.getElementById('studentDisplayName').textContent = `${student.name} 同學`;
+      document.getElementById('studentSeatBadge').textContent = `${student.seat} 號`;
+      document.getElementById('studentSubTitle').textContent = `${classData.school} ${classData.className} • ${classData.examName}`;
+      document.getElementById('studentTeacherNote').textContent = student.note || "本學期課堂表現優良，持續保持主動學習的好習慣！";
+
+      const totalScore = student.scores.reduce((a, b) => a + b, 0);
+      const avgScore = (totalScore / student.scores.length).toFixed(1);
+      document.getElementById('totalScoreBadge').textContent = `總分：${totalScore} 分 / 平均：${avgScore}`;
+
+      const cardsContainer = document.getElementById('subjectCardsContainer');
+      cardsContainer.innerHTML = classData.subjects.map((subj, idx) => {
+        const score = student.scores[idx] || 0;
+        const classAvg = classStats[subj] ? classStats[subj].avg : 0;
+        const diff = score - classAvg;
+        const diffText = diff >= 0 ? `高於班平均 +${diff} 分` : `低於班平均 ${diff} 分`;
+        const diffColor = diff >= 0 ? `text-emerald-700 bg-emerald-50` : `text-amber-700 bg-amber-50`;
+
+        return `
+          <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center font-bold text-slate-800 text-sm shadow-xs">
+                ${subj}
+              </div>
+              <div>
+                <div class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+                  <span class="text-base font-extrabold text-slate-900">${score}</span>
+                  <span class="text-xs text-slate-400">分</span>
+                  ${score >= 90 ? '<span class="text-xs">⭐ 優異</span>' : ''}
+                </div>
+                ${teacherSettings.showClassAverage ? `
+                  <div class="text-[11px] ${diffColor} px-1.5 py-0.5 rounded font-medium inline-block mt-0.5">
+                    ${diffText} (班均 ${classAvg})
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+            
+            <div class="text-right">
+              <span class="text-[11px] px-2.5 py-1 rounded-full font-bold ${
+                score >= 90 ? 'bg-emerald-100 text-emerald-800' :
+                score >= 80 ? 'bg-sky-100 text-sky-800' :
+                score >= 60 ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'
+              }">
+                ${score >= 90 ? '精熟 A+' : score >= 80 ? '良好 A' : score >= 60 ? '基礎 B' : '待加強 C'}
+              </span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const fiveMarksSection = document.getElementById('fiveMarksParentSection');
+      if (teacherSettings.showFiveMarks) {
+        fiveMarksSection.classList.remove('hidden');
+        renderFiveMarksBars(student);
+      } else {
+        fiveMarksSection.classList.add('hidden');
+      }
+
+      const radarSection = document.getElementById('radarChartParentSection');
+      if (teacherSettings.showRadarChart) {
+        radarSection.classList.remove('hidden');
+        renderRadarSvg(student);
+      } else {
+        radarSection.classList.add('hidden');
+      }
+
+      const trendSection = document.getElementById('trendChartParentSection');
+      if (teacherSettings.showTrendChart) {
+        trendSection.classList.remove('hidden');
+        renderTrendSvg(student);
+      } else {
+        trendSection.classList.add('hidden');
+      }
+
+      const aiSection = document.getElementById('aiCoachParentSection');
+      if (teacherSettings.showAICoach) {
+        aiSection.classList.remove('hidden');
+        renderAICoachAdvice(student);
+      } else {
+        aiSection.classList.add('hidden');
+      }
+    }
+
+    function renderFiveMarksBars(student) {
+      const container = document.getElementById('fiveMarksParentContainer');
+      container.innerHTML = classData.subjects.map((subj, idx) => {
+        const score = student.scores[idx] || 0;
+        const s = classStats[subj] || { bottom: 60, low: 70, middle: 80, high: 90, top: 95 };
+
+        let levelLabel = "均標左右";
+        let levelColor = "text-sky-600";
+        if (score >= s.top) { levelLabel = "超越頂標 ⭐"; levelColor = "text-emerald-600"; }
+        else if (score >= s.high) { levelLabel = "前標區間"; levelColor = "text-indigo-600"; }
+        else if (score >= s.middle) { levelLabel = "均標以上"; levelColor = "text-blue-600"; }
+        else if (score >= s.low) { levelLabel = "後標區間"; levelColor = "text-amber-600"; }
+        else { levelLabel = "底標以下"; levelColor = "text-rose-600"; }
+
+        return `
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-slate-800">${subj}（得分：${score}分）</span>
+              <span class="font-bold ${levelColor} text-[11px]">${levelLabel}</span>
+            </div>
+
+            <div class="relative w-full h-5 bg-slate-200 rounded-lg overflow-hidden flex text-[9px] font-mono font-bold text-slate-600">
+              <div style="width: 25%" class="bg-rose-100 flex items-center justify-center border-r border-white/50" title="底標: ${s.bottom}">底</div>
+              <div style="width: 25%" class="bg-amber-100 flex items-center justify-center border-r border-white/50" title="後標: ${s.low}">後</div>
+              <div style="width: 25%" class="bg-blue-100 flex items-center justify-center border-r border-white/50" title="均標: ${s.middle}">均</div>
+              <div style="width: 13%" class="bg-indigo-100 flex items-center justify-center border-r border-white/50" title="前標: ${s.high}">前</div>
+              <div style="width: 12%" class="bg-emerald-100 flex items-center justify-center" title="頂標: ${s.top}">頂</div>
+
+              <div style="left: ${Math.min(96, Math.max(4, score))}%" class="absolute top-0 bottom-0 w-2.5 bg-slate-900 border-2 border-white rounded-full shadow-md -translate-x-1/2"></div>
+            </div>
+
+            <div class="flex justify-between text-[10px] text-slate-400 font-mono">
+              <span>底標 ${s.bottom}</span>
+              <span>後標 ${s.low}</span>
+              <span>均標 ${s.middle}</span>
+              <span>前標 ${s.high}</span>
+              <span>頂標 ${s.top}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderRadarSvg(student) {
+      const container = document.getElementById('radarSvgContainer');
+      const size = 260;
+      const center = size / 2;
+      const radius = 95;
+      const total = classData.subjects.length;
+
+      let gridPolys = '';
+      [0.25, 0.5, 0.75, 1].forEach(rRatio => {
+        const r = radius * rRatio;
+        const points = [];
+        for (let i = 0; i < total; i++) {
+          const angle = (Math.PI * 2 / total) * i - Math.PI / 2;
+          points.push(`${center + r * Math.cos(angle)},${center + r * Math.sin(angle)}`);
+        }
+        gridPolys += `<polygon points="${points.join(' ')}" fill="none" stroke="#e2e8f0" stroke-width="1" />`;
+      });
+
+      let axes = '';
+      for (let i = 0; i < total; i++) {
+        const angle = (Math.PI * 2 / total) * i - Math.PI / 2;
+        const x2 = center + radius * Math.cos(angle);
+        const y2 = center + radius * Math.sin(angle);
+        const labelX = center + (radius + 18) * Math.cos(angle);
+        const labelY = center + (radius + 18) * Math.sin(angle) + 4;
+        axes += `
+          <line x1="${center}" y1="${center}" x2="${x2}" y2="${y2}" stroke="#e2e8f0" stroke-width="1" />
+          <text x="${labelX}" y="${labelY}" font-size="11" font-weight="bold" fill="#475569" text-anchor="middle">${classData.subjects[i]}</text>
+        `;
+      }
+
+      const scorePoints = [];
+      for (let i = 0; i < total; i++) {
+        const angle = (Math.PI * 2 / total) * i - Math.PI / 2;
+        const valRatio = (student.scores[i] || 0) / 100;
+        const r = radius * valRatio;
+        scorePoints.push(`${center + r * Math.cos(angle)},${center + r * Math.sin(angle)}`);
+      }
+
+      container.innerHTML = `
+        <svg width="${size}" height="${size}" viewBox="0 0 ${size}" class="overflow-visible">
+          ${gridPolys}
+          ${axes}
+          <polygon points="${scorePoints.join(' ')}" fill="rgba(99, 102, 241, 0.25)" stroke="#4f46e5" stroke-width="2.5" />
+          ${scorePoints.map(pt => `<circle cx="${pt.split(',')[0]}" cy="${pt.split(',')[1]}" r="4" fill="#4f46e5" stroke="#ffffff" stroke-width="2" />`).join('')}
+        </svg>
+      `;
+    }
+
+    function renderTrendSvg(student) {
+      const container = document.getElementById('trendSvgContainer');
+      const history = classData.historyScores[student.seat] || [
+        { name: "前次評量", avg: Math.max(50, Math.round(student.scores.reduce((a, b) => a + b, 0) / student.scores.length) - 4) },
+        { name: "本次評量", avg: Math.round(student.scores.reduce((a, b) => a + b, 0) / student.scores.length) }
+      ];
+
+      container.innerHTML = `
+        <div class="h-32 w-full flex items-end justify-around border-b border-slate-200 pb-2 pt-4 px-4 bg-slate-50/50 rounded-2xl">
+          ${history.map((h, i) => `
+            <div class="flex flex-col items-center gap-1.5">
+              <span class="text-xs font-bold font-mono text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">${h.avg}分</span>
+              <div class="w-8 rounded-t-lg bg-gradient-to-t from-indigo-500 to-sky-400" style="height: ${(h.avg - 40) * 2}px"></div>
+              <span class="text-[11px] font-medium text-slate-500 mt-1">${h.name}</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderAICoachAdvice(student) {
+      const container = document.getElementById('aiCoachAdviceContent');
+      let maxScore = -1, maxSubj = '';
+      let minScore = 999, minSubj = '';
+      classData.subjects.forEach((subj, i) => {
+        const sc = student.scores[i] || 0;
+        if (sc > maxScore) { maxScore = sc; maxSubj = subj; }
+        if (sc < minScore) { minScore = sc; minSubj = subj; }
+      });
+
+      container.innerHTML = `
+        <p class="font-bold text-slate-800">
+          🌟 <span class="text-indigo-700 font-extrabold">${student.name}</span> 同學學習亮點：
+        </p>
+        <p class="text-slate-600">
+          本次評量在 <strong class="text-emerald-700">【${maxSubj}】</strong> 表現最為出色（${maxScore}分），已展現扎實的概念理解與題目掌握度！
+        </p>
+        <p class="font-bold text-slate-800 pt-1">
+          💡 具體成長複習方針：
+        </p>
+        <ul class="list-disc pl-5 space-y-1 text-slate-600">
+          <li>針對 <strong>【${minSubj}】</strong>（${minScore}分）：建議回顧本次單元中的錯題訂正本，釐清核心概念。</li>
+          <li>每天固定保持 15～20 分鐘課外閱讀或基礎運算練習，能有效鞏固大腦記憶迴路。</li>
+          <li>多跟同學進行討論互動，試著把題目講給別人聽，是最好的深度學習法！</li>
+        </ul>
+      `;
+    }
+
+    // Google 試算表綁定控制
+    function openSheetModal() {
+      document.getElementById('sheetModal').classList.remove('hidden');
+    }
+
+    function closeSheetModal() {
+      document.getElementById('sheetModal').classList.add('hidden');
+    }
+
+    function connectCustomSheet() {
+      const rawUrl = document.getElementById('inputSheetUrl').value.trim();
+      if (!rawUrl) {
+        alert("請輸入 Google 試算表連結！");
+        return;
+      }
+
+      const match = rawUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
+      if (!match) {
+        alert("無法辨識此試算表網址格式，請確認是否包含 /d/試算表ID/ ！");
+        return;
+      }
+
+      const extractedId = match[1];
+      classData.sheetId = extractedId;
+      initTeacherConsole();
+      closeSheetModal();
+      alert(`🎉 成功綁定 Google 試算表！\n試算表 ID：${extractedId}\n\n已為您產生本班專屬網址，老師電腦關機家長依然隨時可查！`);
+    }
+
+    // 免責聲明控制
+    function openDisclaimerModal() {
+      document.getElementById('disclaimerModal').classList.remove('hidden');
+    }
+
+    function closeDisclaimerModal() {
+      document.getElementById('disclaimerModal').classList.add('hidden');
+    }
+
+    initTeacherConsole();
+  </script>
+</body>
+</html>
