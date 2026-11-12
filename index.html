@@ -208,11 +208,11 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <div class="flex items-center gap-2">
-                  <span class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md flex items-center gap-1">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    Google 雲端已連線
+                  <span id="connectionBadge" class="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                    示範體驗模式
                   </span>
-                  <span class="text-xs text-slate-400 font-mono" id="sheetIdPreview">ID: 1onOnOId...ouds</span>
+                  <span class="text-xs text-slate-400 font-mono" id="sheetIdPreview">（純虛構範例，未綁定試算表）</span>
                 </div>
                 <h3 class="text-base font-bold text-slate-900 mt-1" id="currentClassName">範例示範學校 301 班</h3>
                 <p class="text-xs text-slate-500" id="currentExamName">當前評量：113學年度第一學期 第一次定期評量</p>
@@ -238,7 +238,7 @@
                 </div>
                 <div>
                   <div class="text-xs font-bold text-slate-800">本班專屬查詢網址 & LINE 通知卡</div>
-                  <div class="text-xs text-indigo-600 font-mono mt-0.5" id="shareUrlDisplay">https://puti001.github.io/puti-ai-grade/?sheet=1onOnO...</div>
+                  <div class="text-xs text-slate-500 font-mono mt-0.5" id="shareUrlDisplay">未綁定試算表（點擊上方「綁定我的 Google 試算表」後產生專屬網址）</div>
                 </div>
               </div>
               <div class="flex items-center gap-2 w-full sm:w-auto">
@@ -505,16 +505,24 @@
           <label class="block font-bold text-slate-700 mb-1">
             請貼上您的 Google 試算表連結（共用權限設為「知道連結的人均可檢視」）：
           </label>
-          <input type="text" id="inputSheetUrl" placeholder="https://docs.google.com/spreadsheets/d/1onOnOId.../edit" class="w-full p-3 font-mono text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+          <input type="text" id="inputSheetUrl" placeholder="請貼上您自己的 Google 試算表網址，例如：https://docs.google.com/spreadsheets/d/您的試算表ID/edit" class="w-full p-3 font-mono text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
           <p class="text-xs text-slate-400 mt-1">※ 系統僅讀取表內的座號、姓名、出生月日與各科成績，不變更您的試算表內容。</p>
         </div>
 
-        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
-          <div class="font-bold text-slate-700 mb-1">還沒有標準範本？</div>
-          <p class="text-xs text-slate-500 mb-2">您可以直接一鍵複製官方標準成績格式，貼上您班級的分數即可使用：</p>
-          <a href="https://docs.google.com/spreadsheets/d/1onOnOId5e7Uoxk2lw7MYLJlgx-FKgGLMH_8SK0Nouds/copy" target="_blank" class="inline-block px-3 py-1.5 bg-white border border-slate-300 text-slate-700 rounded-lg text-xs font-bold hover:bg-slate-50">
-            📑 一鍵建立官方試算表範本副本 ➔
-          </a>
+        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+          <div class="font-bold text-slate-800 text-sm">還沒有標準成績格式？</div>
+          <p class="text-xs text-slate-500 leading-relaxed">
+            為保障教師個資與雲端硬碟隱私，本系統不提供連往任何私人帳號的試算表副本連結。您可以直接在此一鍵下載純淨的標準格式檔案（CSV），上傳至您自己的 Google 雲端硬碟，完全獨立自主、100% 安全：
+          </p>
+          <div class="flex flex-wrap items-center gap-2 pt-1">
+            <button type="button" onclick="downloadCsvTemplate()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-xs transition flex items-center gap-1.5">
+              <span>📥 一鍵下載標準成績範本 (CSV)</span>
+            </button>
+            <button type="button" onclick="copyTableHeaders()" class="px-3 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-medium transition flex items-center gap-1">
+              <span>📋 複製試算表欄位標題</span>
+            </button>
+          </div>
+          <p class="text-xs text-slate-400">※ 欄位結構：座號、姓名、出生月日、身分證後四碼、國語、數學、英語、自然、社會（科目名稱皆可自由更動）。</p>
         </div>
       </div>
 
@@ -606,7 +614,7 @@
   <script>
     // 預設純虛擬示範資料庫
     let classData = {
-      sheetId: "1onOnOId5e7Uoxk2lw7MYLJlgx-FKgGLMH_8SK0Nouds",
+      sheetId: "",
       school: "範例示範學校",
       className: "301 班",
       examName: "113學年度第一學期 第一次定期評量",
@@ -697,11 +705,26 @@
 
       document.getElementById('currentClassName').textContent = `${classData.school} ${classData.className}`;
       document.getElementById('currentExamName').textContent = `當前評量：${classData.examName}`;
-      document.getElementById('tableHeaderCount').textContent = `全班成績名冊（共 ${classData.students.length} 位學生，由 Google 試算表直接同步）`;
       document.getElementById('parentLoginSchoolTitle').textContent = `${classData.school} ${classData.className}`;
       document.getElementById('parentLoginExamTitle').textContent = classData.examName;
-      document.getElementById('sheetIdPreview').textContent = `ID: ${classData.sheetId.slice(0, 8)}...${classData.sheetId.slice(-4)}`;
-      document.getElementById('shareUrlDisplay').textContent = `https://puti001.github.io/puti-ai-grade/?sheet=${classData.sheetId.slice(0, 10)}`;
+
+      const connectionBadge = document.getElementById('connectionBadge');
+      const sheetPreview = document.getElementById('sheetIdPreview');
+      const shareUrl = document.getElementById('shareUrlDisplay');
+
+      if (classData.sheetId) {
+        document.getElementById('tableHeaderCount').textContent = `全班成績名冊（共 ${classData.students.length} 位學生，已連接 Google 試算表）`;
+        connectionBadge.className = "text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md flex items-center gap-1";
+        connectionBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Google 雲端已連線`;
+        sheetPreview.textContent = `ID: ${classData.sheetId.slice(0, 8)}...${classData.sheetId.slice(-4)}`;
+        shareUrl.textContent = `https://puti001.github.io/puti-ai-grade/?sheet=${classData.sheetId}`;
+      } else {
+        document.getElementById('tableHeaderCount').textContent = `全班成績名冊（共 ${classData.students.length} 位學生，純虛構示範資料）`;
+        connectionBadge.className = "text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md flex items-center gap-1";
+        connectionBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500"></span> 示範體驗模式`;
+        sheetPreview.textContent = `（未綁定試算表）`;
+        shareUrl.textContent = `未綁定試算表（點擊上方「綁定我的 Google 試算表」後產生專屬網址）`;
+      }
 
       const quickBox = document.getElementById('quickLoginButtons');
       quickBox.innerHTML = classData.students.slice(0, 4).map(s => `
@@ -812,6 +835,10 @@
     }
 
     function copyShareText() {
+      if (!classData.sheetId) {
+        alert("⚠️ 目前為示範體驗模式，尚未綁定您專屬的 Google 試算表！\n\n請先點擊上方「🔗 綁定我的 Google 試算表」，貼上您的試算表連結後，系統即會為您產生專屬的班級家長查詢網址與 LINE 文案。");
+        return;
+      }
       const text = `【${classData.school} ${classData.className} ${classData.examName} 成績查詢通知】\n各位家長您好，本次評量成績已開放查詢。請點擊專屬連結，輸入學生座號與出生月日即可查閱個人成績及學習診斷報告：\n👉 https://puti001.github.io/puti-ai-grade/?sheet=${classData.sheetId}`;
       navigator.clipboard.writeText(text).then(() => {
         alert("已成功複製 LINE 通知文案！您可以直接貼到班級群組發給家長。");
@@ -1151,6 +1178,29 @@
 
     function closeDisclaimerModal() {
       document.getElementById('disclaimerModal').classList.add('hidden');
+    }
+
+    
+    function downloadCsvTemplate() {
+      const csvContent = "\uFEFF座號,姓名,出生月日,身分證後四碼,國語,數學,英語,自然,社會\n" +
+        "1,王小明,0101,1234,92,95,88,91,80\n" +
+        "2,李大同,0214,5678,78,82,70,85,75\n" +
+        "3,張美美,0520,9012,85,90,94,88,92\n";
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "Puti_成績系統標準格式範本.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function copyTableHeaders() {
+      const headers = "座號\t姓名\t出生月日\t身分證後四碼\t國語\t數學\t英語\t自然\t社會";
+      navigator.clipboard.writeText(headers).then(() => {
+        alert("✅ 已複製試算表欄位標題！\n您可以開啟您的空白 Google 試算表，在第一列第 A1 格按 Ctrl+V 貼上即可。");
+      });
     }
 
     initTeacherConsole();
