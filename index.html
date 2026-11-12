@@ -216,6 +216,14 @@
                 </div>
                 <h3 class="text-base font-bold text-slate-900 mt-1" id="currentClassName">範例示範學校 301 班</h3>
                 <p class="text-xs text-slate-500" id="currentExamName">當前評量：113學年度第一學期 第一次定期評量</p>
+
+                <!-- 評量分頁切換按鈕區 -->
+                <div class="flex flex-wrap items-center gap-2 mt-2 pt-2 border-t border-slate-100" id="teacherExamTabsWrapper">
+                  <span class="text-xs font-bold text-slate-600">🗓️ 評量分頁切換：</span>
+                  <div id="teacherExamTabsContainer" class="flex flex-wrap items-center gap-1.5">
+                    <!-- 動態渲染各次評量標籤 -->
+                  </div>
+                </div>
               </div>
 
               <!-- 操作按鈕群 -->
@@ -337,6 +345,19 @@
 
       <!-- 成績結果畫面 (登入後) -->
       <div id="parentResultCard" class="hidden space-y-5">
+
+        <!-- 歷次定期評量切換器 (家長端) -->
+        <div id="parentExamSelectorContainer" class="bg-indigo-50/80 border border-indigo-200/80 rounded-2xl p-3 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <span class="text-xs font-bold text-indigo-900 whitespace-nowrap">🗓️ 選擇評量階段：</span>
+            <select id="parentExamSelect" onchange="switchExam(this.value)" class="flex-1 sm:flex-initial text-xs font-bold bg-white border border-indigo-300 rounded-lg px-3 py-1.5 text-indigo-800 shadow-2xs focus:ring-2 focus:ring-indigo-500/20">
+              <!-- 動態填入各次評量 -->
+            </select>
+          </div>
+          <div id="parentGrowthBadge" class="text-xs font-bold text-emerald-700 bg-white border border-emerald-200 px-2.5 py-1 rounded-lg shadow-2xs">
+            相較前次評量 +3.4 分 ⭐
+          </div>
+        </div>
 
         <!-- 學生基本抬頭卡 -->
         <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm flex items-center justify-between">
@@ -509,6 +530,23 @@
           <p class="text-xs text-slate-400 mt-1">※ 系統僅讀取表內的座號、姓名、出生月日與各科成績，不變更您的試算表內容。</p>
         </div>
 
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label class="block font-bold text-slate-700 text-xs">
+              跨次定期評量工作表分頁（若有多個考試分頁，請以逗號隔開）：
+            </label>
+            <span class="text-xs text-indigo-600 font-bold">✨ 自動生成進步趨勢圖</span>
+          </div>
+          <input type="text" id="inputSheetTabs" value="第一次定期評量, 第二次定期評量, 期末定期評量" placeholder="例如：第一次定期評量, 第二次定期評量, 期末考" class="w-full p-3 font-medium text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+          <div class="flex flex-wrap items-center gap-1.5 text-xs text-slate-500 pt-0.5">
+            <span>💡 常用分頁快速帶入：</span>
+            <button type="button" onclick="setPresetTabs('regular')" class="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 rounded text-slate-700 font-medium">第一次、第二次、期末</button>
+            <button type="button" onclick="setPresetTabs('midterm')" class="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 rounded text-slate-700 font-medium">期中考、期末考</button>
+            <button type="button" onclick="setPresetTabs('single')" class="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 rounded text-slate-700 font-medium">僅單一分頁</button>
+          </div>
+          <p class="text-xs text-slate-400">※ 系統會自動對照各分頁的「座號」串接歷次評量，生成個人進步趨勢折線圖與對比分析。</p>
+        </div>
+
         <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
           <div class="font-bold text-slate-800 text-sm">還沒有標準成績格式？</div>
           <p class="text-xs text-slate-500 leading-relaxed">
@@ -617,35 +655,42 @@
   <!-- JavaScript 資料邏輯與動態渲染 -->
   <!-- ========================================== -->
   <script>
-    // 預設純虛擬示範資料庫
-    let classData = {
-      sheetId: "",
-      school: "範例示範學校",
-      className: "301 班",
-      examName: "113學年度第一學期 第一次定期評量",
-      subjects: ["國語", "數學", "英語", "自然", "社會"],
-      students: [
-        { seat: 1, name: "王小明", birthday: "0101", idLast4: "1234", scores: [92, 95, 88, 91, 80], note: "小明本學期發言非常主動，數學邏輯思考敏捷，國語生字工整進步顯著！" },
-        { seat: 2, name: "李大同", birthday: "0202", idLast4: "2345", scores: [85, 78, 80, 84, 75], note: "大同課堂專注度提升，自然實驗觀察敏銳，數學多做題目會更加熟練！" },
-        { seat: 3, name: "林美美", birthday: "0303", idLast4: "3456", scores: [96, 98, 95, 94, 92], note: "美美表現沉穩優異，各科均衡全面，是全班同學的學習楷模！" },
-        { seat: 4, name: "張志強", birthday: "0404", idLast4: "4567", scores: [76, 68, 72, 80, 70], note: "志強熱心參與班級事務，若在數學幾何與應用題稍加練習，一定能大步前進！" },
-        { seat: 5, name: "趙小敏", birthday: "0505", idLast4: "5678", scores: [88, 82, 85, 86, 84], note: "小敏學習態度積極認真，各科都有穩定表現，再接再厲！" },
-        { seat: 6, name: "陳建國", birthday: "0606", idLast4: "6789", scores: [79, 85, 76, 82, 78], note: "建國思維活潑，數學反應敏捷，英語單字多朗讀會更有信心！" },
-        { seat: 7, name: "周雅婷", birthday: "0707", idLast4: "7890", scores: [90, 88, 92, 89, 85], note: "雅婷作業書寫工整，喜愛閱讀各類課外書，表現可圈可點！" },
-        { seat: 8, name: "吳冠宇", birthday: "0808", idLast4: "8901", scores: [84, 76, 81, 79, 74], note: "冠宇待人有禮，上課能跟上節奏，考前若能多複習弱項成績會更棒！" },
-        { seat: 9, name: "蔡佳穎", birthday: "0909", idLast4: "9012", scores: [94, 91, 89, 93, 88], note: "佳穎理解能力強，課堂互動積極，各科成績均十分亮眼！" },
-        { seat: 10, name: "黃柏翰", birthday: "1010", idLast4: "0123", scores: [81, 84, 78, 85, 80], note: "柏翰做事細心負責，科學實驗很有探究精神，非常棒！" }
-      ],
-      historyScores: {
-        1: [
-          { name: "開學考", avg: 82.5 },
-          { name: "第一次評量", avg: 89.2 }
-        ],
-        3: [
-          { name: "開學考", avg: 92.0 },
-          { name: "第一次評量", avg: 95.0 }
+    // 預設示範歷次評量資料庫（支援分頁跨次進步對比）
+    let allExams = [
+      {
+        name: "第一次定期評量",
+        subjects: ["國語", "數學", "英語", "自然", "社會"],
+        students: [
+          { seat: 1, name: "王小明", birthday: "0101", idLast4: "1234", scores: [86, 88, 82, 85, 78], note: "開學以來上課主動，各科平穩，數學應用題稍加強！" },
+          { seat: 2, name: "李大同", birthday: "0202", idLast4: "2345", scores: [80, 72, 75, 78, 70], note: "課堂表現良好，持續加強基礎運算練習！" },
+          { seat: 3, name: "林美美", birthday: "0303", idLast4: "3456", scores: [92, 94, 90, 91, 88], note: "各科均衡全面，學習自律，表現優秀！" },
+          { seat: 4, name: "張志強", birthday: "0404", idLast4: "4567", scores: [72, 65, 68, 75, 66], note: "學習態度認真，若在數學幾何多加練習必有突破！" },
+          { seat: 5, name: "趙小敏", birthday: "0505", idLast4: "5678", scores: [85, 80, 82, 84, 80], note: "學習態度積極，各科表現平穩再接再厲！" }
+        ]
+      },
+      {
+        name: "第二次定期評量",
+        subjects: ["國語", "數學", "英語", "自然", "社會"],
+        students: [
+          { seat: 1, name: "王小明", birthday: "0101", idLast4: "1234", scores: [92, 95, 88, 91, 80], note: "小明本學期發言非常主動，數學邏輯思考敏捷，進步顯著！" },
+          { seat: 2, name: "李大同", birthday: "0202", idLast4: "2345", scores: [85, 78, 80, 84, 75], note: "大同課堂專注度提升，自然實驗觀察敏銳，數學進步良多！" },
+          { seat: 3, name: "林美美", birthday: "0303", idLast4: "3456", scores: [96, 98, 95, 94, 92], note: "美美表現沉穩優異，各科均衡全面，是全班同學的學習楷模！" },
+          { seat: 4, name: "張志強", birthday: "0404", idLast4: "4567", scores: [76, 68, 72, 80, 70], note: "志強熱心參與班級事務，各科均有顯著進步，值得讚賞！" },
+          { seat: 5, name: "趙小敏", birthday: "0505", idLast4: "5678", scores: [88, 82, 85, 86, 84], note: "小敏學習態度積極認真，各科都有穩定表現，再接再厲！" }
         ]
       }
+    ];
+
+    let currentExamIndex = 1; // 預設指向最新評量
+
+    let classData = {
+      sheetId: "",
+      tabs: "第一次定期評量, 第二次定期評量",
+      school: "範例示範學校",
+      className: "301 班",
+      examName: allExams[1].name,
+      subjects: allExams[1].subjects,
+      students: allExams[1].students
     };
 
     let teacherSettings = {
@@ -1100,43 +1145,137 @@
       `;
     }
 
+    function getStudentGrowthAnalysis(student) {
+      if (!allExams || allExams.length < 2 || currentExamIndex === 0) {
+        return null;
+      }
+      const prevExam = allExams[currentExamIndex - 1];
+      const prevStudent = prevExam.students.find(s => s.seat === student.seat);
+      if (!prevStudent) return null;
+
+      const currSum = student.scores.reduce((a, b) => a + b, 0);
+      const currAvg = student.scores.length > 0 ? Math.round((currSum / student.scores.length) * 10) / 10 : 0;
+
+      const prevSum = prevStudent.scores.reduce((a, b) => a + b, 0);
+      const prevAvg = prevStudent.scores.length > 0 ? Math.round((prevSum / prevStudent.scores.length) * 10) / 10 : 0;
+
+      const diff = Math.round((currAvg - prevAvg) * 10) / 10;
+
+      let maxGain = -999, maxGainSubj = "";
+      classData.subjects.forEach((subj, i) => {
+        const prevSubjIdx = prevExam.subjects.indexOf(subj);
+        if (prevSubjIdx !== -1) {
+          const gain = (student.scores[i] || 0) - (prevStudent.scores[prevSubjIdx] || 0);
+          if (gain > maxGain) {
+            maxGain = gain;
+            maxGainSubj = subj;
+          }
+        }
+      });
+
+      return {
+        prevExamName: prevExam.name,
+        diff: diff,
+        currAvg: currAvg,
+        prevAvg: prevAvg,
+        maxGain: maxGain,
+        maxGainSubj: maxGainSubj
+      };
+    }
+
     function renderTrendSvg(student) {
-      const container = document.getElementById('trendSvgContainer');
-      const history = classData.historyScores[student.seat] || [
-        { name: "前次評量", avg: Math.max(50, Math.round(student.scores.reduce((a, b) => a + b, 0) / student.scores.length) - 4) },
-        { name: "本次評量", avg: Math.round(student.scores.reduce((a, b) => a + b, 0) / student.scores.length) }
-      ];
+      const container = document.getElementById("trendSvgContainer");
+      const badge = document.getElementById("trendDiffBadge");
+      const parentBadge = document.getElementById("parentGrowthBadge");
+
+      const history = allExams.map(ex => {
+        const match = ex.students.find(s => s.seat === student.seat);
+        if (!match) return null;
+        const sum = match.scores.reduce((a, b) => a + b, 0);
+        const avg = match.scores.length > 0 ? Math.round((sum / match.scores.length) * 10) / 10 : 0;
+        return {
+          name: ex.name,
+          avg: avg
+        };
+      }).filter(Boolean);
+
+      const growth = getStudentGrowthAnalysis(student);
+      if (growth) {
+        const diffText = growth.diff >= 0 ? `相較上次進步 +${growth.diff} 分 ⭐` : `相較上次 ${growth.diff} 分`;
+        const diffClass = growth.diff >= 0 ? "text-emerald-700 bg-emerald-50 border-emerald-200" : "text-amber-700 bg-amber-50 border-amber-200";
+        if (badge) {
+          badge.textContent = diffText;
+          badge.className = `text-xs font-bold ${growth.diff >= 0 ? "text-emerald-600" : "text-amber-600"}`;
+        }
+        if (parentBadge) {
+          parentBadge.textContent = diffText;
+          parentBadge.className = `text-xs font-bold px-2.5 py-1 rounded-lg border shadow-2xs ${diffClass}`;
+          parentBadge.classList.remove("hidden");
+        }
+      } else {
+        if (badge) badge.textContent = "首次評量（基準建立）";
+        if (parentBadge) parentBadge.classList.add("hidden");
+      }
 
       container.innerHTML = `
-        <div class="h-32 w-full flex items-end justify-around border-b border-slate-200 pb-2 pt-4 px-4 bg-slate-50/50 rounded-2xl">
-          ${history.map((h, i) => `
-            <div class="flex flex-col items-center gap-1.5">
-              <span class="text-xs font-bold font-mono text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">${h.avg}分</span>
-              <div class="w-8 rounded-t-lg bg-gradient-to-t from-indigo-500 to-sky-400" style="height: ${(h.avg - 40) * 2}px"></div>
-              <span class="text-xs font-medium text-slate-500 mt-1">${h.name}</span>
-            </div>
-          `).join('')}
+        <div class="h-36 w-full flex items-end justify-around border-b border-slate-200 pb-2 pt-4 px-4 bg-slate-50/50 rounded-2xl">
+          ${history.map((h, i) => {
+            const isCurrent = (allExams[currentExamIndex] && allExams[currentExamIndex].name === h.name);
+            const prevH = i > 0 ? history[i - 1] : null;
+            const diffFromPrev = prevH ? Math.round((h.avg - prevH.avg) * 10) / 10 : null;
+            return `
+              <div class="flex flex-col items-center gap-1.5 flex-1 max-w-[120px]">
+                <div class="flex flex-col items-center">
+                  ${diffFromPrev !== null ? `
+                    <span class="text-[10px] font-bold ${diffFromPrev >= 0 ? "text-emerald-600" : "text-amber-600"}">
+                      ${diffFromPrev >= 0 ? "↑ +" + diffFromPrev : "↓ " + diffFromPrev}
+                    </span>
+                  ` : ""}
+                  <span class="text-xs font-bold font-mono px-2 py-0.5 rounded-md border ${isCurrent ? "text-indigo-800 bg-indigo-100 border-indigo-300 ring-2 ring-indigo-400/30 font-extrabold" : "text-slate-700 bg-white border-slate-200"}">
+                    ${h.avg}分
+                  </span>
+                </div>
+                <div class="w-8 rounded-t-lg ${isCurrent ? "bg-gradient-to-t from-indigo-600 to-sky-400 shadow-md" : "bg-slate-300"}" style="height: ${Math.max(20, (h.avg - 40) * 2.2)}px"></div>
+                <span class="text-xs font-medium text-center text-slate-600 mt-1 truncate w-full" title="${h.name}">${h.name}</span>
+              </div>
+            `;
+          }).join("")}
         </div>
       `;
     }
 
     function renderAICoachAdvice(student) {
-      const container = document.getElementById('aiCoachAdviceContent');
-      let maxScore = -1, maxSubj = '';
-      let minScore = 999, minSubj = '';
+      const container = document.getElementById("aiCoachAdviceContent");
+      let maxScore = -1, maxSubj = "";
+      let minScore = 999, minSubj = "";
       classData.subjects.forEach((subj, i) => {
         const sc = student.scores[i] || 0;
         if (sc > maxScore) { maxScore = sc; maxSubj = subj; }
         if (sc < minScore) { minScore = sc; minSubj = subj; }
       });
 
+      const growth = getStudentGrowthAnalysis(student);
+
       container.innerHTML = `
         <p class="font-bold text-slate-800">
           🌟 <span class="text-indigo-700 font-extrabold">${student.name}</span> 同學學習亮點：
         </p>
-        <p class="text-slate-600">
+        <p class="text-slate-600 leading-relaxed">
           本次評量在 <strong class="text-emerald-700">【${maxSubj}】</strong> 表現最為出色（${maxScore}分），已展現扎實的概念理解與題目掌握度！
         </p>
+
+        ${growth && growth.diff > 0 ? `
+          <div class="p-3 bg-emerald-50/80 border border-emerald-200 rounded-xl text-emerald-900 text-xs">
+            🎉 <strong>自我突破肯定</strong>：相較 ${growth.prevExamName}，總平均大幅成長了 <strong>+${growth.diff} 分</strong>！${growth.maxGainSubj && growth.maxGain > 0 ? `特別在【<strong>${growth.maxGainSubj}</strong>】成長了 +${growth.maxGain} 分，顯見這段時間的複習方法非常有效！` : ""}
+          </div>
+        ` : ""}
+
+        ${growth && growth.diff < 0 ? `
+          <div class="p-3 bg-amber-50/80 border border-amber-200 rounded-xl text-amber-900 text-xs">
+            🌱 <strong>成長與調整契機</strong>：本次平均稍有波動（相較上次 ${growth.diff} 分）。評量是檢驗觀念漏洞的起點，請給孩子多一點溫暖鼓勵，陪同檢視訂正本，就能穩步重回上升軌道！
+          </div>
+        ` : ""}
+
         <p class="font-bold text-slate-800 pt-1">
           💡 具體成長複習方針：
         </p>
@@ -1148,36 +1287,65 @@
       `;
     }
 
-    // Google 試算表綁定控制
+    // 多評量分頁與 Google 試算表控制
+    function setPresetTabs(type) {
+      const input = document.getElementById("inputSheetTabs");
+      if (type === "regular") input.value = "第一次定期評量, 第二次定期評量, 期末定期評量";
+      else if (type === "midterm") input.value = "期中考, 期末考";
+      else if (type === "single") input.value = "";
+    }
+
+    function syncCurrentExam() {
+      if (!allExams || allExams.length === 0) return;
+      if (currentExamIndex >= allExams.length) currentExamIndex = allExams.length - 1;
+      if (currentExamIndex < 0) currentExamIndex = 0;
+
+      const current = allExams[currentExamIndex];
+      classData.examName = current.name;
+      classData.subjects = current.subjects;
+      classData.students = current.students;
+
+      renderExamTabsUI();
+    }
+
+    function switchExam(idx) {
+      currentExamIndex = parseInt(idx, 10);
+      syncCurrentExam();
+      initTeacherConsole();
+      if (currentLoggedInStudent) {
+        const updated = classData.students.find(s => s.seat === currentLoggedInStudent.seat) || currentLoggedInStudent;
+        renderStudentResult(updated);
+      }
+    }
+
+    function renderExamTabsUI() {
+      const container = document.getElementById("teacherExamTabsContainer");
+      if (container) {
+        container.innerHTML = allExams.map((ex, idx) => `
+          <button type="button" onclick="switchExam(${idx})" class="px-3 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${idx === currentExamIndex ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">
+            <span>${ex.name}</span>
+            ${idx === allExams.length - 1 && allExams.length > 1 ? '<span class="bg-indigo-400/40 text-[9px] px-1 py-0.2 rounded text-white">最新</span>' : ''}
+          </button>
+        `).join("");
+      }
+
+      const pSel = document.getElementById("parentExamSelect");
+      if (pSel) {
+        pSel.innerHTML = allExams.map((ex, idx) => `
+          <option value="${idx}" ${idx === currentExamIndex ? 'selected' : ''}>
+            ${ex.name} ${idx === allExams.length - 1 && allExams.length > 1 ? '（最新評量）' : ''}
+          </option>
+        `).join("");
+      }
+    }
+
     function openSheetModal() {
-      document.getElementById('sheetModal').classList.remove('hidden');
+      document.getElementById("sheetModal").classList.remove("hidden");
     }
 
     function closeSheetModal() {
-      document.getElementById('sheetModal').classList.add('hidden');
+      document.getElementById("sheetModal").classList.add("hidden");
     }
-
-    function connectCustomSheet() {
-      const rawUrl = document.getElementById('inputSheetUrl').value.trim();
-      if (!rawUrl) {
-        alert("請輸入 Google 試算表連結！");
-        return;
-      }
-
-      const match = rawUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
-      if (!match) {
-        alert("無法辨識此試算表網址格式，請確認是否包含 /d/試算表ID/ ！");
-        return;
-      }
-
-      const extractedId = match[1];
-      const gidMatch = rawUrl.match(/gid=([0-9]+)/);
-      const gid = gidMatch ? gidMatch[1] : "0";
-
-      loadGoogleSheetData(extractedId, gid, true);
-    }
-
-    let sheetLoadingTimer = null;
 
     function formatBirthdayCell(cell) {
       if (!cell) return "0101";
@@ -1199,7 +1367,7 @@
 
     function parseGoogleSheetData(jsonpData) {
       if (!jsonpData || !jsonpData.table || !jsonpData.table.rows || jsonpData.table.rows.length === 0) {
-        throw new Error("試算表內容為空或讀取失敗！");
+        throw new Error("工作表內容為空！");
       }
 
       const cols = jsonpData.table.cols || [];
@@ -1291,156 +1459,207 @@
       };
     }
 
-    function loadGoogleSheetData(sheetId, gid = "0", isUserAction = false) {
+    function fetchSingleTab(sheetId, tabName = null, gid = null) {
+      return new Promise((resolve) => {
+        const cbName = "onTabLoaded_" + Math.random().toString(36).substring(2, 9);
+        let done = false;
+        const timer = setTimeout(() => {
+          if (!done) {
+            done = true;
+            delete window[cbName];
+            resolve(null);
+          }
+        }, 8000);
+
+        window[cbName] = function(jsonpData) {
+          if (done) return;
+          done = true;
+          clearTimeout(timer);
+          delete window[cbName];
+          try {
+            const parsed = parseGoogleSheetData(jsonpData);
+            if (parsed.students && parsed.students.length > 0) {
+              resolve({
+                name: tabName || "定期評量",
+                subjects: parsed.subjects,
+                students: parsed.students
+              });
+            } else {
+              resolve(null);
+            }
+          } catch (e) {
+            resolve(null);
+          }
+        };
+
+        const script = document.createElement("script");
+        let query = "";
+        if (tabName) {
+          query = `sheet=${encodeURIComponent(tabName)}`;
+        } else if (gid !== null) {
+          query = `gid=${gid}`;
+        }
+        script.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?${query}&tqx=responseHandler:${cbName}&t=${Date.now()}`;
+        script.onerror = function() {
+          if (!done) {
+            done = true;
+            clearTimeout(timer);
+            delete window[cbName];
+            resolve(null);
+          }
+        };
+        document.body.appendChild(script);
+      });
+    }
+
+    async function loadGoogleSheetMultiTabs(sheetId, tabNames, isUserAction = false) {
       if (!sheetId) return;
 
-      const btn = document.getElementById('btnConnectSheet');
+      const btn = document.getElementById("btnConnectSheet");
       if (btn) {
         btn.disabled = true;
-        btn.innerHTML = `<span class="inline-block animate-spin mr-1">🌀</span> 讀取中...`;
+        btn.innerHTML = `<span class="inline-block animate-spin mr-1">🌀</span> 讀取分頁中...`;
       }
 
-      const connectionBadge = document.getElementById('connectionBadge');
+      const connectionBadge = document.getElementById("connectionBadge");
       if (connectionBadge) {
         connectionBadge.className = "text-xs font-bold text-sky-800 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded-md flex items-center gap-1";
-        connectionBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-sky-500 animate-ping"></span> 雲端試算表讀取中...`;
+        connectionBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-sky-500 animate-ping"></span> 正在同步定期評量分頁...`;
       }
 
-      const oldScript = document.getElementById('googleSheetJsonpScript');
-      if (oldScript) oldScript.remove();
+      const loadedExams = [];
 
-      let hasResponded = false;
-
-      if (sheetLoadingTimer) clearTimeout(sheetLoadingTimer);
-      sheetLoadingTimer = setTimeout(() => {
-        if (!hasResponded) {
-          hasResponded = true;
-          if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = `<span>確認連線並同步試算表</span>`;
-          }
-          if (connectionBadge) {
-            connectionBadge.className = "text-xs font-bold text-red-800 bg-red-50 border border-red-200 px-2 py-0.5 rounded-md flex items-center gap-1";
-            connectionBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> 連線失敗`;
-          }
-          alert("⚠️ 無法讀取此 Google 試算表！\n\n可能原因：\n1. 試算表共用權限尚未開啟：請至 Google 試算表點右上角「共用」，將「一般存取權」設為【知道連結的使用者均可檢視】。\n2. 試算表 ID 有誤。\n\n請檢查權限後重新點擊連線！");
-        }
-      }, 9000);
-
-      window.onGoogleSheetLoaded = function(jsonpData) {
-        if (hasResponded) return;
-        hasResponded = true;
-        if (sheetLoadingTimer) clearTimeout(sheetLoadingTimer);
-
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = `<span>確認連線並同步試算表</span>`;
-        }
-
+      for (let i = 0; i < tabNames.length; i++) {
+        const tabName = tabNames[i].trim();
+        if (!tabName) continue;
         try {
-          const parsed = parseGoogleSheetData(jsonpData);
-          if (!parsed.students || parsed.students.length === 0) {
-            alert("⚠️ 試算表已連線成功，但未讀取到有效的學生名冊！\n請確認工作表第 1 列含有「座號、姓名、出生月日」等欄位，並填有學生分數。");
-            return;
+          const res = await fetchSingleTab(sheetId, tabName);
+          if (res && res.students && res.students.length > 0) {
+            loadedExams.push(res);
           }
+        } catch (e) {
+          console.warn(`Tab ${tabName} load error:`, e);
+        }
+      }
 
-          classData.sheetId = sheetId;
-          classData.gid = gid;
-          classData.subjects = parsed.subjects;
-          classData.students = parsed.students;
-
-          localStorage.setItem('puti_bound_sheet_id', sheetId);
-          localStorage.setItem('puti_bound_sheet_gid', gid);
-
-          initTeacherConsole();
-          closeSheetModal();
-
-          if (isUserAction) {
-            alert(`🎉 成功同步 Google 試算表！\n\n已成功載入本班 ${parsed.students.length} 位學生資料與 ${parsed.subjects.length} 個評量科目（${parsed.subjects.join("、")}）！\n\n已產生專屬家長查詢網址，老師電腦關機家長隨時可依座號與生日查榜。`);
+      if (loadedExams.length === 0) {
+        try {
+          const defaultRes = await fetchSingleTab(sheetId, null, "0");
+          if (defaultRes && defaultRes.students && defaultRes.students.length > 0) {
+            defaultRes.name = tabNames[0] || "定期評量";
+            loadedExams.push(defaultRes);
           }
-        } catch (err) {
-          console.error(err);
-          alert(`⚠️ 解析試算表格式時發生問題：${err.message}\n請確認試算表格式是否符合標準（可點擊「下載標準成績範本」對照）。`);
-        }
-      };
+        } catch (e) {}
+      }
 
-      const script = document.createElement('script');
-      script.id = 'googleSheetJsonpScript';
-      script.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?gid=${gid}&tqx=responseHandler:onGoogleSheetLoaded&t=${Date.now()}`;
-      script.onerror = function() {
-        if (hasResponded) return;
-        hasResponded = true;
-        if (sheetLoadingTimer) clearTimeout(sheetLoadingTimer);
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = `<span>確認連線並同步試算表</span>`;
-        }
-        alert("⚠️ 連線 Google 試算表失敗！\n請確認此試算表右上角「共用」已設為【知道連結的使用者均可檢視】。");
-      };
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<span>確認連線並同步試算表</span>`;
+      }
 
-      document.body.appendChild(script);
+      if (loadedExams.length === 0) {
+        if (connectionBadge) {
+          connectionBadge.className = "text-xs font-bold text-red-800 bg-red-50 border border-red-200 px-2 py-0.5 rounded-md flex items-center gap-1";
+          connectionBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> 連線失敗`;
+        }
+        alert("⚠️ 無法讀取試算表中的評量分頁！\n\n請確認：\n1. 試算表右上角「共用」已設為【知道連結的使用者均可檢視】。\n2. 輸入的工作表分頁名稱（如：第一次定期評量）與試算表下方的標籤名稱完全一致。");
+        return;
+      }
+
+      allExams = loadedExams;
+      currentExamIndex = allExams.length - 1;
+      classData.sheetId = sheetId;
+      classData.tabs = tabNames.join(",");
+
+      localStorage.setItem("puti_bound_sheet_id", sheetId);
+      localStorage.setItem("puti_bound_sheet_tabs", classData.tabs);
+
+      syncCurrentExam();
+      initTeacherConsole();
+      closeSheetModal();
+
+      if (isUserAction) {
+        const examNames = allExams.map(e => e.name).join("、");
+        alert("🎉 成功同步 Google 試算表！\n\n已成功載入 " + allExams.length + " 個定期評量分頁（" + examNames + "）！\n\n系統已自動為全班學生建立跨次進步趨勢折線圖與對比分析！");
+      }
+    }
+
+    function connectCustomSheet() {
+      const rawUrl = document.getElementById("inputSheetUrl").value.trim();
+      if (!rawUrl) {
+        alert("請輸入 Google 試算表連結！");
+        return;
+      }
+
+      const match = rawUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
+      if (!match) {
+        alert("無法辨識此試算表網址格式，請確認是否包含 /d/試算表ID/ ！");
+        return;
+      }
+
+      const extractedId = match[1];
+      const rawTabs = document.getElementById("inputSheetTabs").value.trim();
+      let tabNames = rawTabs.split(/[,，]/).map(t => t.trim()).filter(Boolean);
+      if (tabNames.length === 0) {
+        tabNames = ["第一次定期評量", "第二次定期評量", "期末定期評量"];
+      }
+
+      loadGoogleSheetMultiTabs(extractedId, tabNames, true);
     }
 
     function resetToDemoData() {
       if (confirm("確定要清除目前綁定的試算表，恢復為內建的虛擬示範資料嗎？")) {
-        localStorage.removeItem('puti_bound_sheet_id');
-        localStorage.removeItem('puti_bound_sheet_gid');
-        classData = JSON.parse(JSON.stringify(DEFAULT_MOCK_DATA));
-        initTeacherConsole();
-        closeSheetModal();
-        alert("已恢復為純虛擬示範模式！");
+        localStorage.removeItem("puti_bound_sheet_id");
+        localStorage.removeItem("puti_bound_sheet_tabs");
+        location.href = location.pathname;
       }
     }
 
-    // 免責聲明控制
     function openDisclaimerModal() {
-      document.getElementById('disclaimerModal').classList.remove('hidden');
+      document.getElementById("disclaimerModal").classList.remove("hidden");
     }
 
     function closeDisclaimerModal() {
-      document.getElementById('disclaimerModal').classList.add('hidden');
+      document.getElementById("disclaimerModal").classList.add("hidden");
     }
 
-    
     function downloadCsvTemplate() {
-      const csvContent = "\uFEFF座號,姓名,出生月日,身分證後四碼,國語,數學,英語,自然,社會\n" +
-        "1,王小明,0101,1234,92,95,88,91,80\n" +
-        "2,李大同,0214,5678,78,82,70,85,75\n" +
-        "3,張美美,0520,9012,85,90,94,88,92\n";
+      const csvContent = "\uFEFF座號,姓名,出生月日,身分證後四碼,國語,數學,英語,自然,社會\n1,王小明,0101,1234,92,95,88,91,80\n2,李大同,0214,5678,78,82,70,85,75\n3,張美美,0520,9012,85,90,94,88,92\n";
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.setAttribute("href", url);
-      link.setAttribute("download", "Puti_成績系統標準格式範本.csv");
+      link.setAttribute("download", "Puti_定期評量標準範本.csv");
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     }
 
     function copyTableHeaders() {
-      const headers = "座號\t姓名\t出生月日\t身分證後四碼\t國語\t數學\t英語\t自然\t社會";
+      const headers = "座號	姓名	出生月日	身分證後四碼	國語	數學	英語	自然	社會";
       navigator.clipboard.writeText(headers).then(() => {
         alert("✅ 已複製試算表欄位標題！\n您可以開啟您的空白 Google 試算表，在第一列第 A1 格按 Ctrl+V 貼上即可。");
       });
     }
 
-    // 頁面載入時檢查是否有傳入 sheet 參數或先前儲存的設定
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener("DOMContentLoaded", () => {
+      syncCurrentExam();
       initTeacherConsole();
 
       const urlParams = new URLSearchParams(window.location.search);
-      const paramSheet = urlParams.get('sheet');
-      const paramGid = urlParams.get('gid') || "0";
+      const paramSheet = urlParams.get("sheet");
+      const paramTabs = urlParams.get("tabs");
 
       if (paramSheet) {
-        // 從家長分享連結點入
-        loadGoogleSheetData(paramSheet, paramGid, false);
-        switchView('parent');
+        const tabList = paramTabs ? paramTabs.split(",").map(t => decodeURIComponent(t.trim())).filter(Boolean) : ["第一次定期評量", "第二次定期評量", "期末定期評量"];
+        loadGoogleSheetMultiTabs(paramSheet, tabList, false);
+        switchView("parent");
       } else {
-        const savedSheet = localStorage.getItem('puti_bound_sheet_id');
-        const savedGid = localStorage.getItem('puti_bound_sheet_gid') || "0";
+        const savedSheet = localStorage.getItem("puti_bound_sheet_id");
+        const savedTabs = localStorage.getItem("puti_bound_sheet_tabs");
         if (savedSheet) {
-          loadGoogleSheetData(savedSheet, savedGid, false);
+          const tabList = savedTabs ? savedTabs.split(",").map(t => t.trim()).filter(Boolean) : ["第一次定期評量", "第二次定期評量", "期末定期評量"];
+          loadGoogleSheetMultiTabs(savedSheet, tabList, false);
         }
       }
     });
