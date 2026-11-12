@@ -530,21 +530,29 @@
           <p class="text-xs text-slate-400 mt-1">※ 系統僅讀取表內的座號、姓名、出生月日與各科成績，不變更您的試算表內容。</p>
         </div>
 
-        <div class="space-y-1.5">
+        <div class="space-y-2 p-3.5 bg-indigo-50/70 border border-indigo-200/80 rounded-2xl">
           <div class="flex items-center justify-between">
-            <label class="block font-bold text-slate-700 text-xs">
-              跨次定期評量工作表分頁（若有多個考試分頁，請以逗號隔開）：
+            <label class="block font-bold text-indigo-950 text-xs">
+              試算表下方的評量分頁名稱（以逗號隔開）：
             </label>
-            <span class="text-xs text-indigo-600 font-bold">✨ 自動生成進步趨勢圖</span>
+            <span class="text-xs text-indigo-700 font-bold">✨ 自動生成歷次進步趨勢</span>
           </div>
-          <input type="text" id="inputSheetTabs" value="第一次定期評量, 第二次定期評量, 期末定期評量" placeholder="例如：第一次定期評量, 第二次定期評量, 期末考" class="w-full p-3 font-medium text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
-          <div class="flex flex-wrap items-center gap-1.5 text-xs text-slate-500 pt-0.5">
-            <span>💡 常用分頁快速帶入：</span>
-            <button type="button" onclick="setPresetTabs('regular')" class="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 rounded text-slate-700 font-medium">第一次、第二次、期末</button>
-            <button type="button" onclick="setPresetTabs('midterm')" class="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 rounded text-slate-700 font-medium">期中考、期末考</button>
-            <button type="button" onclick="setPresetTabs('single')" class="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 rounded text-slate-700 font-medium">僅單一分頁</button>
+          <input type="text" id="inputSheetTabs" value="期中考, 期末考" placeholder="例如：期中考, 期末考 或 第一次定期評量, 第二次定期評量" class="w-full p-3 font-bold text-xs bg-white border border-indigo-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 shadow-2xs">
+          <div class="flex flex-wrap items-center gap-1.5 text-xs pt-0.5">
+            <span class="font-bold text-slate-700">⚡ 快速點選帶入：</span>
+            <button type="button" onclick="setPresetTabs('midterm')" class="px-2.5 py-1 bg-white hover:bg-indigo-100 border border-indigo-300 rounded-lg text-indigo-800 font-bold transition shadow-2xs">
+              🍎 期中考、期末考
+            </button>
+            <button type="button" onclick="setPresetTabs('regular')" class="px-2.5 py-1 bg-white hover:bg-indigo-100 border border-indigo-300 rounded-lg text-indigo-800 font-bold transition shadow-2xs">
+              🎓 第一次、第二次、期末評量
+            </button>
+            <button type="button" onclick="setPresetTabs('single')" class="px-2 py-1 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-slate-600 transition">
+              單一分頁
+            </button>
           </div>
-          <p class="text-xs text-slate-400">※ 系統會自動對照各分頁的「座號」串接歷次評量，生成個人進步趨勢折線圖與對比分析。</p>
+          <p class="text-[11px] text-indigo-900/80 leading-relaxed">
+            ※ 請與您 Google 試算表底部的分頁標籤名稱相符（如：<strong>期中考</strong>）。系統亦具備<strong>智慧自動探測</strong>功能，若有常用名稱會自動連線！
+          </p>
         </div>
 
         <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
@@ -1290,8 +1298,8 @@
     // 多評量分頁與 Google 試算表控制
     function setPresetTabs(type) {
       const input = document.getElementById("inputSheetTabs");
-      if (type === "regular") input.value = "第一次定期評量, 第二次定期評量, 期末定期評量";
-      else if (type === "midterm") input.value = "期中考, 期末考";
+      if (type === "midterm") input.value = "期中考, 期末考";
+      else if (type === "regular") input.value = "第一次定期評量, 第二次定期評量, 期末定期評量";
       else if (type === "single") input.value = "";
     }
 
@@ -1340,6 +1348,14 @@
     }
 
     function openSheetModal() {
+      const savedId = localStorage.getItem("puti_bound_sheet_id");
+      const savedTabs = localStorage.getItem("puti_bound_sheet_tabs");
+      if (savedId) {
+        document.getElementById("inputSheetUrl").value = "https://docs.google.com/spreadsheets/d/" + savedId + "/edit";
+      }
+      if (savedTabs) {
+        document.getElementById("inputSheetTabs").value = savedTabs;
+      }
       document.getElementById("sheetModal").classList.remove("hidden");
     }
 
@@ -1518,17 +1534,18 @@
       const btn = document.getElementById("btnConnectSheet");
       if (btn) {
         btn.disabled = true;
-        btn.innerHTML = `<span class="inline-block animate-spin mr-1">🌀</span> 讀取分頁中...`;
+        btn.innerHTML = `<span class="inline-block animate-spin mr-1">🌀</span> 同步試算表中...`;
       }
 
       const connectionBadge = document.getElementById("connectionBadge");
       if (connectionBadge) {
         connectionBadge.className = "text-xs font-bold text-sky-800 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded-md flex items-center gap-1";
-        connectionBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-sky-500 animate-ping"></span> 正在同步定期評量分頁...`;
+        connectionBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-sky-500 animate-ping"></span> 正在讀取評量分頁...`;
       }
 
-      const loadedExams = [];
+      let loadedExams = [];
 
+      // 步驟 1：依據使用者指定或預設的分頁名稱嘗試載入
       for (let i = 0; i < tabNames.length; i++) {
         const tabName = tabNames[i].trim();
         if (!tabName) continue;
@@ -1538,10 +1555,43 @@
             loadedExams.push(res);
           }
         } catch (e) {
-          console.warn(`Tab ${tabName} load error:`, e);
+          console.warn("Tab " + tabName + " load error:", e);
         }
       }
 
+      // 步驟 2：若指定名稱未找到任何分頁，啟動【智慧自動探測】常用分頁組合！
+      if (loadedExams.length === 0) {
+        if (connectionBadge) {
+          connectionBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> 智慧探測分頁中（期中考、期末考...）...`;
+        }
+
+        const candidateSets = [
+          ["期中考", "期末考"],
+          ["第一次定期評量", "第二次定期評量", "期末定期評量"],
+          ["第一次評量", "第二次評量", "期末評量"],
+          ["第1次定期評量", "第2次定期評量", "第3次定期評量"],
+          ["第一次段考", "第二次段考", "期末考"],
+          ["第1次段考", "第2次段考", "第3次段考"],
+          ["工作表1", "工作表2"],
+          ["Sheet1", "Sheet2"]
+        ];
+
+        for (const set of candidateSets) {
+          const firstTab = await fetchSingleTab(sheetId, set[0]);
+          if (firstTab && firstTab.students && firstTab.students.length > 0) {
+            loadedExams.push(firstTab);
+            for (let j = 1; j < set.length; j++) {
+              const nextTab = await fetchSingleTab(sheetId, set[j]);
+              if (nextTab && nextTab.students && nextTab.students.length > 0) {
+                loadedExams.push(nextTab);
+              }
+            }
+            break;
+          }
+        }
+      }
+
+      // 步驟 3：若依然沒有，嘗試讀取首頁主工作表 (gid=0)
       if (loadedExams.length === 0) {
         try {
           const defaultRes = await fetchSingleTab(sheetId, null, "0");
@@ -1562,15 +1612,16 @@
           connectionBadge.className = "text-xs font-bold text-red-800 bg-red-50 border border-red-200 px-2 py-0.5 rounded-md flex items-center gap-1";
           connectionBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> 連線失敗`;
         }
-        alert("⚠️ 無法讀取試算表中的評量分頁！\n\n請確認：\n1. 試算表右上角「共用」已設為【知道連結的使用者均可檢視】。\n2. 輸入的工作表分頁名稱（如：第一次定期評量）與試算表下方的標籤名稱完全一致。");
+        alert("⚠️ 無法讀取試算表中的評量分頁！\n\n請確認：\n1. 試算表右上角「共用」已設為【知道連結的使用者均可檢視】。\n2. 試算表下方的分頁名稱是否為「期中考、期末考」或「第一次定期評量」等。\n\n請確認共用權限後再試一次！");
         return;
       }
 
       allExams = loadedExams;
       currentExamIndex = allExams.length - 1;
       classData.sheetId = sheetId;
-      classData.tabs = tabNames.join(",");
+      classData.tabs = allExams.map(e => e.name).join(",");
 
+      // 成功同步後，自動儲存至本機記憶 (localStorage)，下次開瀏覽器免再綁定！
       localStorage.setItem("puti_bound_sheet_id", sheetId);
       localStorage.setItem("puti_bound_sheet_tabs", classData.tabs);
 
@@ -1580,7 +1631,7 @@
 
       if (isUserAction) {
         const examNames = allExams.map(e => e.name).join("、");
-        alert("🎉 成功同步 Google 試算表！\n\n已成功載入 " + allExams.length + " 個定期評量分頁（" + examNames + "）！\n\n系統已自動為全班學生建立跨次進步趨勢折線圖與對比分析！");
+        alert("🎉 成功同步 Google 試算表！\n\n已成功載入 " + allExams.length + " 個定期評量分頁（" + examNames + "）！\n已自動儲存至本機記憶（下次開啟免再綁定）。\n\n系統已為全班學生建立跨次進步趨勢折線圖與對比分析！");
       }
     }
 
